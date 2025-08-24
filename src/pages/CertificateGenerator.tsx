@@ -78,8 +78,8 @@ const CertificateGenerator = () => {
   const generatePDF = () => {
     if (!formData.certificateType) {
       toast({
-        title: "Tipe Sertifikat Belum Dipilih",
-        description: "Silakan pilih tipe sertifikat terlebih dahulu.",
+        title: "Tipe Surat Belum Dipilih",
+        description: "Silakan pilih tipe surat terlebih dahulu.",
         variant: "destructive"
       });
       return;
@@ -242,12 +242,12 @@ const CertificateGenerator = () => {
     doc.text("RIYATI", pageWidth - margin - 50, yPosition);
 
     // Save PDF
-    const fileName = `sertifikat_${formData.certificateType}_${new Date().toISOString().split('T')[0]}.pdf`;
+    const fileName = `surat_${formData.certificateType}_${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(fileName);
 
     toast({
       title: "PDF Berhasil Dibuat!",
-      description: `Sertifikat telah disimpan sebagai ${fileName}`,
+      description: `Surat telah disimpan sebagai ${fileName}`,
     });
   };
 
@@ -580,10 +580,10 @@ const CertificateGenerator = () => {
     <div className="py-8">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Generator Sertifikat Desa Dermolo</h1>
+          <h1 className="text-4xl font-bold mb-4">Generator Surat Desa Dermolo</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Buat berbagai jenis surat keterangan resmi Desa Dermolo dengan mudah.
-            Pilih jenis sertifikat dan isi formulir untuk menghasilkan PDF.
+            Pilih jenis surat dan isi formulir untuk menghasilkan PDF.
           </p>
         </div>
 
@@ -593,18 +593,18 @@ const CertificateGenerator = () => {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <FileText className="w-5 h-5 mr-2 text-primary" />
-                  Buat Sertifikat Baru
+                  Buat Surat Baru
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="certificateType">Jenis Sertifikat</Label>
+                  <Label htmlFor="certificateType">Jenis Surat</Label>
                   <Select 
                     value={formData.certificateType} 
                     onValueChange={(value) => handleSelectChange("certificateType", value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Pilih jenis sertifikat" />
+                      <SelectValue placeholder="Pilih jenis surat" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="business">Surat Keterangan Usaha</SelectItem>
@@ -620,7 +620,7 @@ const CertificateGenerator = () => {
                   <div className="flex flex-wrap gap-4 pt-6">
                     <Button onClick={handlePreview} variant="outline">
                       <Eye className="w-4 h-4 mr-2" />
-                      Preview Sertifikat
+                      Preview Surat
                     </Button>
                     <Button onClick={generatePDF} disabled={!formData.applicantName.trim()}>
                       <Download className="w-4 h-4 mr-2" />
@@ -639,7 +639,7 @@ const CertificateGenerator = () => {
                 <div className="flex justify-between items-center">
                   <CardTitle className="flex items-center">
                     <Eye className="w-5 h-5 mr-2 text-primary" />
-                    Preview Sertifikat
+                    Preview Surat
                   </CardTitle>
                   <div className="flex gap-2">
                     <Button onClick={generatePDF} size="sm">
@@ -647,7 +647,7 @@ const CertificateGenerator = () => {
                       Unduh PDF
                     </Button>
                     <Button onClick={handlePreview} variant="outline" size="sm">
-                      Edit Sertifikat
+                      Edit Surat
                     </Button>
                   </div>
                 </div>

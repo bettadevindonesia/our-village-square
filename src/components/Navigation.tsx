@@ -11,8 +11,8 @@ const Navigation = () => {
     { href: "/events", label: "Acara", icon: Calendar },
     { href: "/announcements", label: "Pengumuman", icon: Bell },
     { href: "/contact", label: "Kontak", icon: Phone },
-    { href: "/letter", label: "Buat Surat", icon: FileText },
-    { href: "/certificate", label: "Buat Sertifikat", icon: FileText },
+    // { href: "/letter", label: "Buat Surat", icon: FileText },
+    { href: "/certificate", label: "Buat Surat", icon: FileText },
   ];
 
   return (
