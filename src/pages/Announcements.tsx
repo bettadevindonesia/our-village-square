@@ -1,10 +1,22 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { mockAnnouncements } from "@/data/mockData";
-import { Bell, AlertTriangle, Info, Calendar, Wrench, AlertCircle } from "lucide-react";
+import { Bell, AlertTriangle, Info, Calendar, Wrench, AlertCircle, ArrowRight } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { id } from "date-fns/locale";
+import { Link } from "react-router-dom";
 
 const Announcements = () => {
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case "high": return "Tinggi";
+      case "medium": return "Sedang";
+      case "low": return "Rendah";
+      default: return priority;
+    }
+  };
+
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
       case "high": return AlertTriangle;
@@ -20,6 +32,16 @@ const Announcements = () => {
       case "medium": return "bg-village-amber/10 text-village-amber border-village-amber/20";
       case "low": return "bg-village-blue/10 text-village-blue border-village-blue/20";
       default: return "bg-muted text-muted-foreground";
+    }
+  };
+
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case "emergency": return "Darurat";
+      case "maintenance": return "Pemeliharaan";
+      case "general": return "Umum";
+      case "event": return "Acara";
+      default: return category;
     }
   };
 
@@ -53,9 +75,9 @@ const Announcements = () => {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Village Announcements</h1>
+          <h1 className="text-4xl font-bold mb-4">Pengumuman Desa</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Stay informed with the latest news, updates, and important information from your village administration.
+            Tetap terinformasi dengan berita terbaru, pembaruan, dan informasi penting dari administrasi desa Anda.
           </p>
         </div>
 
@@ -78,15 +100,15 @@ const Announcements = () => {
                     <div className="flex gap-2">
                       <Badge className={getPriorityColor(announcement.priority)}>
                         <PriorityIcon className="w-3 h-3 mr-1" />
-                        {announcement.priority.charAt(0).toUpperCase() + announcement.priority.slice(1)} Priority
+                        Prioritas {getPriorityLabel(announcement.priority)}
                       </Badge>
                       <Badge variant="outline" className={getCategoryColor(announcement.category)}>
                         <CategoryIcon className="w-3 h-3 mr-1" />
-                        {announcement.category.charAt(0).toUpperCase() + announcement.category.slice(1)}
+                        {getCategoryLabel(announcement.category)}
                       </Badge>
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {format(announcementDate, "MMM d, yyyy")}
+                      {format(announcementDate, "d MMM yyyy", { locale: id })}
                     </div>
                   </div>
                   
@@ -94,9 +116,15 @@ const Announcements = () => {
                 </CardHeader>
                 
                 <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-muted-foreground leading-relaxed mb-4">
                     {announcement.content}
                   </p>
+                  <Link to={`/announcements/${announcement.id}`}>
+                    <Button variant="outline" className="w-full">
+                      Baca Selengkapnya
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             );
@@ -107,9 +135,9 @@ const Announcements = () => {
         {sortedAnnouncements.length === 0 && (
           <div className="text-center py-16">
             <Bell className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No announcements</h3>
+            <h3 className="text-xl font-semibold mb-2">Tidak ada pengumuman</h3>
             <p className="text-muted-foreground">
-              Check back later for village updates and announcements.
+              Periksa kembali nanti untuk pembaruan dan pengumuman desa.
             </p>
           </div>
         )}
@@ -118,49 +146,49 @@ const Announcements = () => {
         <div className="mt-16 space-y-8">
           {/* Priority Levels */}
           <div className="p-6 bg-muted/30 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4 text-center">Priority Levels</h3>
+            <h3 className="text-lg font-semibold mb-4 text-center">Tingkat Prioritas</h3>
             <div className="grid md:grid-cols-3 gap-4 text-center">
               <div className="flex flex-col items-center space-y-2">
                 <AlertTriangle className="w-6 h-6 text-destructive" />
-                <span className="text-sm font-medium">High Priority</span>
-                <span className="text-xs text-muted-foreground">Urgent matters requiring immediate attention</span>
+                <span className="text-sm font-medium">Prioritas Tinggi</span>
+                <span className="text-xs text-muted-foreground">Urusan mendesak yang memerlukan perhatian segera</span>
               </div>
               <div className="flex flex-col items-center space-y-2">
                 <Info className="w-6 h-6 text-village-amber" />
-                <span className="text-sm font-medium">Medium Priority</span>
-                <span className="text-xs text-muted-foreground">Important updates and changes</span>
+                <span className="text-sm font-medium">Prioritas Sedang</span>
+                <span className="text-xs text-muted-foreground">Pembaruan dan perubahan penting</span>
               </div>
               <div className="flex flex-col items-center space-y-2">
                 <Bell className="w-6 h-6 text-village-blue" />
-                <span className="text-sm font-medium">Low Priority</span>
-                <span className="text-xs text-muted-foreground">General information and updates</span>
+                <span className="text-sm font-medium">Prioritas Rendah</span>
+                <span className="text-xs text-muted-foreground">Informasi umum dan pembaruan</span>
               </div>
             </div>
           </div>
 
           {/* Categories */}
           <div className="p-6 bg-muted/30 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4 text-center">Announcement Categories</h3>
+            <h3 className="text-lg font-semibold mb-4 text-center">Kategori Pengumuman</h3>
             <div className="grid md:grid-cols-4 gap-4 text-center">
               <div className="flex flex-col items-center space-y-2">
                 <AlertCircle className="w-6 h-6 text-destructive" />
-                <span className="text-sm font-medium">Emergency</span>
-                <span className="text-xs text-muted-foreground">Safety & emergency information</span>
+                <span className="text-sm font-medium">Darurat</span>
+                <span className="text-xs text-muted-foreground">Informasi keselamatan & darurat</span>
               </div>
               <div className="flex flex-col items-center space-y-2">
                 <Wrench className="w-6 h-6 text-village-amber" />
-                <span className="text-sm font-medium">Maintenance</span>
-                <span className="text-xs text-muted-foreground">Infrastructure & service updates</span>
+                <span className="text-sm font-medium">Pemeliharaan</span>
+                <span className="text-xs text-muted-foreground">Pembaruan infrastruktur & layanan</span>
               </div>
               <div className="flex flex-col items-center space-y-2">
                 <Calendar className="w-6 h-6 text-village-green" />
-                <span className="text-sm font-medium">Event</span>
-                <span className="text-xs text-muted-foreground">Event-related announcements</span>
+                <span className="text-sm font-medium">Acara</span>
+                <span className="text-xs text-muted-foreground">Pengumuman terkait acara</span>
               </div>
               <div className="flex flex-col items-center space-y-2">
                 <Info className="w-6 h-6 text-primary" />
-                <span className="text-sm font-medium">General</span>
-                <span className="text-xs text-muted-foreground">General village information</span>
+                <span className="text-sm font-medium">Umum</span>
+                <span className="text-xs text-muted-foreground">Informasi umum desa</span>
               </div>
             </div>
           </div>

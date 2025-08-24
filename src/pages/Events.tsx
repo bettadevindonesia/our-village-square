@@ -1,8 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { mockEvents } from "@/data/mockData";
-import { Calendar, Clock, MapPin, Users, Award, Palette, Trophy } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Award, Palette, Trophy, ArrowRight } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { id } from "date-fns/locale";
+import { Link } from "react-router-dom";
 
 const Events = () => {
   const getCategoryIcon = (category: string) => {
@@ -12,6 +15,16 @@ const Events = () => {
       case "sports": return Trophy;
       case "community": return Award;
       default: return Calendar;
+    }
+  };
+
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case "government": return "Pemerintahan";
+      case "culture": return "Budaya";
+      case "sports": return "Olahraga";
+      case "community": return "Komunitas";
+      default: return category;
     }
   };
 
@@ -35,9 +48,9 @@ const Events = () => {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Village Events</h1>
+          <h1 className="text-4xl font-bold mb-4">Acara Desa</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Stay connected with our vibrant community through upcoming events, meetings, and celebrations.
+            Tetap terhubung dengan komunitas kami yang dinamis melalui acara mendatang, rapat, dan perayaan.
           </p>
         </div>
 
@@ -53,12 +66,12 @@ const Events = () => {
                   <div className="flex justify-between items-start mb-4">
                     <Badge className={getCategoryColor(event.category)}>
                       <CategoryIcon className="w-3 h-3 mr-1" />
-                      {event.category.charAt(0).toUpperCase() + event.category.slice(1)}
+                      {getCategoryLabel(event.category)}
                     </Badge>
                     <div className="text-right text-sm text-muted-foreground">
                       <div className="flex items-center">
                         <Calendar className="w-4 h-4 mr-1" />
-                        {format(eventDate, "MMM d, yyyy")}
+                        {format(eventDate, "d MMM yyyy", { locale: id })}
                       </div>
                     </div>
                   </div>
@@ -68,7 +81,7 @@ const Events = () => {
                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center">
                       <Clock className="w-4 h-4 mr-1" />
-                      {event.time}
+                      {event.time} WIB
                     </div>
                     <div className="flex items-center">
                       <MapPin className="w-4 h-4 mr-1" />
@@ -78,9 +91,15 @@ const Events = () => {
                 </CardHeader>
                 
                 <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-muted-foreground leading-relaxed mb-4">
                     {event.description}
                   </p>
+                  <Link to={`/events/${event.id}`}>
+                    <Button variant="outline" className="w-full">
+                      Lihat Detail
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             );
@@ -91,36 +110,36 @@ const Events = () => {
         {sortedEvents.length === 0 && (
           <div className="text-center py-16">
             <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No upcoming events</h3>
+            <h3 className="text-xl font-semibold mb-2">Tidak ada acara mendatang</h3>
             <p className="text-muted-foreground">
-              Check back soon for new community events and activities.
+              Periksa kembali segera untuk acara dan kegiatan komunitas baru.
             </p>
           </div>
         )}
 
         {/* Categories Info */}
         <div className="mt-16 p-6 bg-muted/30 rounded-lg">
-          <h3 className="text-lg font-semibold mb-4 text-center">Event Categories</h3>
+          <h3 className="text-lg font-semibold mb-4 text-center">Kategori Acara</h3>
           <div className="grid md:grid-cols-4 gap-4 text-center">
             <div className="flex flex-col items-center space-y-2">
               <Users className="w-6 h-6 text-village-blue" />
-              <span className="text-sm font-medium">Government</span>
-              <span className="text-xs text-muted-foreground">Official meetings & proceedings</span>
+              <span className="text-sm font-medium">Pemerintahan</span>
+              <span className="text-xs text-muted-foreground">Rapat resmi & urusan pemerintahan</span>
             </div>
             <div className="flex flex-col items-center space-y-2">
               <Palette className="w-6 h-6 text-village-amber" />
-              <span className="text-sm font-medium">Culture</span>
-              <span className="text-xs text-muted-foreground">Festivals & cultural activities</span>
+              <span className="text-sm font-medium">Budaya</span>
+              <span className="text-xs text-muted-foreground">Festival & kegiatan budaya</span>
             </div>
             <div className="flex flex-col items-center space-y-2">
               <Trophy className="w-6 h-6 text-village-green" />
-              <span className="text-sm font-medium">Sports</span>
-              <span className="text-xs text-muted-foreground">Athletic events & competitions</span>
+              <span className="text-sm font-medium">Olahraga</span>
+              <span className="text-xs text-muted-foreground">Acara olahraga & kompetisi</span>
             </div>
             <div className="flex flex-col items-center space-y-2">
               <Award className="w-6 h-6 text-primary" />
-              <span className="text-sm font-medium">Community</span>
-              <span className="text-xs text-muted-foreground">Volunteer & social activities</span>
+              <span className="text-sm font-medium">Komunitas</span>
+              <span className="text-xs text-muted-foreground">Kegiatan sosial & volunteer</span>
             </div>
           </div>
         </div>

@@ -6,12 +6,13 @@ const Navigation = () => {
   const location = useLocation();
 
   const navItems = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/about", label: "About", icon: Users },
-    { href: "/events", label: "Events", icon: Calendar },
-    { href: "/announcements", label: "Announcements", icon: Bell },
-    { href: "/contact", label: "Contact", icon: Phone },
-    { href: "/letter", label: "Create Letter", icon: FileText },
+    { href: "/", label: "Beranda", icon: Home },
+    { href: "/about", label: "Tentang", icon: Users },
+    { href: "/events", label: "Acara", icon: Calendar },
+    { href: "/announcements", label: "Pengumuman", icon: Bell },
+    { href: "/contact", label: "Kontak", icon: Phone },
+    { href: "/letter", label: "Buat Surat", icon: FileText },
+    { href: "/certificate", label: "Buat Sertifikat", icon: FileText },
   ];
 
   return (
@@ -22,7 +23,7 @@ const Navigation = () => {
             <div className="w-8 h-8 bg-gradient-hero rounded-full flex items-center justify-center">
               <Home className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">Village Portal</span>
+            <span className="text-xl font-bold text-foreground">Portal Desa Dermolo</span>
           </Link>
           
           <div className="hidden md:flex items-center space-x-1">

@@ -20,38 +20,38 @@ export interface Announcement {
 export const mockEvents: Event[] = [
   {
     id: "1",
-    title: "Village Council Meeting",
+    title: "Rapat Dewan Desa",
     date: "2024-09-15",
     time: "19:00",
-    location: "Town Hall",
-    description: "Monthly village council meeting to discuss community matters and upcoming projects.",
+    location: "Balai Desa",
+    description: "Rapat rutin bulanan dewan desa untuk membahas urusan masyarakat dan proyek-proyek mendatang. Semua warga diundang untuk hadir dan menyampaikan aspirasi.",
     category: "government"
   },
   {
     id: "2",
-    title: "Annual Harvest Festival",
+    title: "Festival Panen Tahunan",
     date: "2024-09-22",
     time: "14:00",
-    location: "Village Green",
-    description: "Join us for our traditional harvest festival with local food, music, and crafts.",
+    location: "Alun-alun Desa",
+    description: "Bergabunglah dengan festival panen tradisional kami dengan makanan lokal, musik, dan kerajinan tangan. Acara ini merupakan tradisi turun temurun desa kita.",
     category: "culture"
   },
   {
     id: "3",
-    title: "Community Garden Workshop",
+    title: "Workshop Kebun Komunitas",
     date: "2024-09-08",
     time: "10:00",
-    location: "Community Garden",
-    description: "Learn sustainable gardening techniques and help maintain our community spaces.",
+    location: "Kebun Komunitas",
+    description: "Pelajari teknik berkebun berkelanjutan dan bantu merawat ruang komunitas kita. Akan ada penyuluhan dari dinas pertanian setempat.",
     category: "community"
   },
   {
     id: "4",
-    title: "Village Football Match",
+    title: "Pertandingan Sepak Bola Desa",
     date: "2024-09-10",
     time: "15:00",
-    location: "Sports Field",
-    description: "Friendly match between local teams. All residents welcome to watch and cheer!",
+    location: "Lapangan Olahraga",
+    description: "Pertandingan persahabatan antara tim lokal. Semua warga diundang untuk menonton dan memberikan dukungan!",
     category: "sports"
   }
 ];
@@ -59,32 +59,32 @@ export const mockEvents: Event[] = [
 export const mockAnnouncements: Announcement[] = [
   {
     id: "1",
-    title: "Water Main Maintenance",
-    content: "Water supply will be temporarily interrupted on September 5th from 9:00 AM to 3:00 PM for essential maintenance work on Oak Street.",
+    title: "Pemeliharaan Pipa Air Utama",
+    content: "Pasokan air akan terganggu sementara pada tanggal 5 September dari pukul 09:00 hingga 15:00 untuk pekerjaan pemeliharaan penting di Jalan Beringin. Mohon warga mempersiapkan cadangan air.",
     date: "2024-09-01",
     priority: "high",
     category: "maintenance"
   },
   {
     id: "2",
-    title: "New Recycling Guidelines",
-    content: "Starting October 1st, new recycling guidelines will be in effect. Please separate glass items from other recyclables. Collection schedule remains unchanged.",
+    title: "Pedoman Daur Ulang Baru",
+    content: "Mulai 1 Oktober, pedoman daur ulang baru akan diberlakukan. Harap pisahkan barang kaca dari bahan daur ulang lainnya. Jadwal pengumpulan tetap tidak berubah.",
     date: "2024-08-28",
     priority: "medium",
     category: "general"
   },
   {
     id: "3",
-    title: "Village WiFi Upgrade Complete",
-    content: "The village-wide WiFi network upgrade has been completed. Residents can now access faster internet speeds in all public areas.",
+    title: "Upgrade WiFi Desa Selesai",
+    content: "Upgrade jaringan WiFi desa telah selesai. Warga sekarang dapat mengakses internet dengan kecepatan lebih tinggi di semua area publik.",
     date: "2024-08-25",
     priority: "low",
     category: "general"
   },
   {
     id: "4",
-    title: "Emergency Contact Updates",
-    content: "Please ensure your emergency contact information is up to date with the village office. This helps us reach you during important announcements.",
+    title: "Pembaruan Kontak Darurat",
+    content: "Harap pastikan informasi kontak darurat Anda terbaru dengan kantor desa. Ini membantu kami menghubungi Anda selama pengumuman penting.",
     date: "2024-08-20",
     priority: "medium",
     category: "emergency"

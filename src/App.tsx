@@ -10,6 +10,9 @@ import Contact from "./pages/Contact";
 import Events from "./pages/Events";
 import Announcements from "./pages/Announcements";
 import LetterGenerator from "./pages/LetterGenerator";
+import CertificateGenerator from "./pages/CertificateGenerator";
+import EventDetail from "./pages/EventDetail";
+import AnnouncementDetail from "./pages/AnnouncementDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,8 +31,11 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/events" element={<Events />} />
+              <Route path="/events/:id" element={<EventDetail />} />
               <Route path="/announcements" element={<Announcements />} />
+              <Route path="/announcements/:id" element={<AnnouncementDetail />} />
               <Route path="/letter" element={<LetterGenerator />} />
+              <Route path="/certificate" element={<CertificateGenerator />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

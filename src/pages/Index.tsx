@@ -8,29 +8,29 @@ const Index = () => {
   const quickLinks = [
     {
       icon: Calendar,
-      title: "Upcoming Events",
-      description: "View community events and activities",
+      title: "Acara Mendatang",
+      description: "Lihat acara dan kegiatan komunitas",
       href: "/events",
       color: "text-village-blue"
     },
     {
       icon: Bell,
-      title: "Announcements",
-      description: "Stay updated with village news",
+      title: "Pengumuman",
+      description: "Tetap update dengan berita desa",
       href: "/announcements",
       color: "text-village-green"
     },
     {
       icon: Users,
-      title: "About Our Village",
-      description: "Learn about our community",
+      title: "Tentang Desa Kami",
+      description: "Pelajari tentang komunitas kami",
       href: "/about",
       color: "text-village-amber"
     },
     {
       icon: Phone,
-      title: "Contact Us",
-      description: "Get in touch with village office",
+      title: "Hubungi Kami",
+      description: "Hubungi kantor desa",
       href: "/contact",
       color: "text-primary"
     }
@@ -49,23 +49,23 @@ const Index = () => {
           <div className="container mx-auto px-4">
             <div className="max-w-2xl text-white">
               <h1 className="text-4xl lg:text-6xl font-bold mb-4 animate-fade-in">
-                Welcome to Our Village
+                Selamat Datang di Desa Dermolo
               </h1>
               <p className="text-lg lg:text-xl mb-8 animate-slide-up">
-                A thriving community dedicated to preserving our heritage while embracing the future. 
-                Stay connected with everything happening in our beautiful village.
+                Komunitas yang berkembang yang didedikasikan untuk melestarikan warisan kami sambil merangkul masa depan. 
+                Tetap terhubung dengan segala yang terjadi di desa indah kami.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/events">
                   <Button size="lg" className="w-full sm:w-auto">
                     <Calendar className="w-5 h-5 mr-2" />
-                    View Events
+                    Lihat Acara
                   </Button>
                 </Link>
-                <Link to="/letter">
+                <Link to="/certificate">
                   <Button variant="secondary" size="lg" className="w-full sm:w-auto">
                     <FileText className="w-5 h-5 mr-2" />
-                    Create Letter
+                    Buat Sertifikat
                   </Button>
                 </Link>
               </div>
@@ -78,9 +78,9 @@ const Index = () => {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Village Services</h2>
+            <h2 className="text-3xl font-bold mb-4">Layanan Desa</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Quick access to essential village information and services. Everything you need to stay connected with our community.
+              Akses cepat ke informasi dan layanan desa yang penting. Semua yang Anda butuhkan untuk tetap terhubung dengan komunitas kami.
             </p>
           </div>
           
@@ -110,30 +110,30 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold mb-6">Living in Our Community</h2>
+              <h2 className="text-3xl font-bold mb-6">Hidup di Komunitas Kami</h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                Our village combines the charm of traditional living with modern conveniences. 
-                We're proud of our close-knit community, beautiful natural surroundings, and 
-                commitment to sustainable development.
+                Desa kami menggabungkan pesona kehidupan tradisional dengan kemudahan modern. 
+                Kami bangga dengan komunitas yang erat, lingkungan alam yang indah, dan 
+                komitmen terhadap pembangunan berkelanjutan.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <MapPin className="w-5 h-5 text-village-blue" />
-                  <span>Located in the heart of beautiful countryside</span>
+                  <span>Terletak di jantung pedesaan yang indah</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Users className="w-5 h-5 text-village-green" />
-                  <span>Population of friendly, engaged residents</span>
+                  <span>Populasi warga yang ramah dan terlibat aktif</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Calendar className="w-5 h-5 text-village-amber" />
-                  <span>Rich calendar of community events year-round</span>
+                  <span>Kalender acara komunitas yang kaya sepanjang tahun</span>
                 </div>
               </div>
               <div className="mt-8">
                 <Link to="/about">
                   <Button variant="outline" size="lg">
-                    Learn More About Us
+                    Pelajari Lebih Lanjut Tentang Kami
                   </Button>
                 </Link>
               </div>
@@ -143,27 +143,27 @@ const Index = () => {
               <Card className="p-8 bg-gradient-card">
                 <CardContent className="space-y-6">
                   <div className="text-center">
-                    <h3 className="text-2xl font-bold mb-2">Quick Contact</h3>
-                    <p className="text-muted-foreground">Need assistance? We're here to help.</p>
+                    <h3 className="text-2xl font-bold mb-2">Kontak Cepat</h3>
+                    <p className="text-muted-foreground">Butuh bantuan? Kami siap membantu.</p>
                   </div>
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
-                      <span className="font-medium">Village Office:</span>
-                      <span>(555) 123-4567</span>
+                      <span className="font-medium">Kantor Desa:</span>
+                      <span>(0291) 123-456</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="font-medium">Emergency:</span>
-                      <span>(555) 911-0000</span>
+                      <span className="font-medium">Darurat:</span>
+                      <span>(0291) 911-000</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Email:</span>
-                      <span>office@village.gov</span>
+                      <span>kantor@desadermolo.id</span>
                     </div>
                   </div>
                   <Link to="/contact" className="block">
                     <Button className="w-full">
                       <Phone className="w-4 h-4 mr-2" />
-                      Contact Us
+                      Hubungi Kami
                     </Button>
                   </Link>
                 </CardContent>
