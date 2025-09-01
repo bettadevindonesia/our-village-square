@@ -9,7 +9,6 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Events from "./pages/Events";
 import Announcements from "./pages/Announcements";
-import LetterGenerator from "./pages/LetterGenerator";
 import CertificateGenerator from "./pages/CertificateGenerator";
 import EventDetail from "./pages/EventDetail";
 import AnnouncementDetail from "./pages/AnnouncementDetail";
@@ -28,14 +27,13 @@ const App = () => (
           <main>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/events/:id" element={<EventDetail />} />
-              <Route path="/announcements" element={<Announcements />} />
-              <Route path="/announcements/:id" element={<AnnouncementDetail />} />
-              <Route path="/letter" element={<LetterGenerator />} />
-              <Route path="/certificate" element={<CertificateGenerator />} />
+              <Route path="/tentang" element={<About />} />
+              <Route path="/kontak" element={<Contact />} />
+              <Route path="/acara" element={<Events />} />
+              <Route path="/acara/:id" element={<EventDetail />} />
+              <Route path="/pengumuman" element={<Announcements />} />
+              <Route path="/pengumuman/:id" element={<AnnouncementDetail />} />
+              <Route path="/surat" element={<CertificateGenerator />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

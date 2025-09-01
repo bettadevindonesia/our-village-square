@@ -35,8 +35,8 @@ const Contact = () => {
   const contactInfo = [
     {
       icon: Phone,
-      title: "Phone",
-      details: ["(555) 123-4567", "Mon-Fri: 8:00 AM - 5:00 PM"],
+      title: "Telepon",
+      details: ["(555) 123-4567", "Sesuai jam kerja"],
       color: "text-village-blue"
     },
     {
@@ -47,14 +47,14 @@ const Contact = () => {
     },
     {
       icon: MapPin,
-      title: "Address",
-      details: ["123 Main Street", "Village Center, State 12345"],
+      title: "Alamat",
+      details: ["Jl. Beringin Raya No. 1 RT 03/RW 01", "Dermolo, Kec. Kembang, Kab. Jepara, 59453"],
       color: "text-village-amber"
     },
     {
       icon: Clock,
-      title: "Office Hours",
-      details: ["Monday - Friday: 8:00 AM - 5:00 PM", "Saturday: 9:00 AM - 12:00 PM"],
+      title: "Jam Kerja",
+      details: ["Senin - Kamis: 8:00 WIB - 16:00 WIB", "Jumat: 8:00 WIB - 11:00 WIB", "Sabtu: 8:00 WIB - 16:00 WIB"],
       color: "text-primary"
     }
   ];
@@ -64,106 +64,22 @@ const Contact = () => {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
+          <h1 className="text-4xl font-bold mb-4">Kontak Kami</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Get in touch with the village administration. We're here to help with your questions, 
-            concerns, and suggestions.
+            Hubungi kami di pemerintahan desa. Kami di sini untuk membantu dengan pertanyaan, 
+            kekhawatiran, dan saran Anda.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Send className="w-5 h-5 mr-2 text-primary" />
-                  Send us a Message
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name *</Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="Enter your full name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address *</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="Enter your email"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        placeholder="Enter your phone number"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="subject">Subject *</Label>
-                      <Input
-                        id="subject"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="What is this regarding?"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Message *</Label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="Please describe your inquiry in detail..."
-                      className="min-h-[150px]"
-                    />
-                  </div>
-                  
-                  <Button type="submit" className="w-full" size="lg">
-                    <Send className="w-4 h-4 mr-2" />
-                    Send Message
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-
+        <div className="flex items-center w-1/2 mx-auto">
           {/* Contact Information */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold mb-6">Get in Touch</h2>
+              <h2 className="text-2xl font-bold mb-6 text-center">Hubungi Kami</h2>
               <p className="text-muted-foreground mb-8">
-                We're always happy to hear from our residents. Whether you have questions about 
-                village services, want to report an issue, or have suggestions for improvement, 
-                don't hesitate to reach out.
+                Kami selalu senang mendengar dari warga kami. Apakah Anda memiliki pertanyaan tentang
+                layanan desa, ingin melaporkan masalah, atau memiliki saran untuk perbaikan,
+                jangan ragu untuk menghubungi kami.
               </p>
             </div>
 
@@ -200,15 +116,15 @@ const Contact = () => {
                     <Phone className="w-5 h-5 text-destructive" />
                   </div>
                   <div>
-                    <h3 className="font-semibold mb-2 text-destructive">Emergency Contact</h3>
+                    <h3 className="font-semibold mb-2 text-destructive">Kontak Darurat</h3>
                     <p className="text-sm text-muted-foreground">
-                      For urgent matters requiring immediate attention
+                      Untuk masalah mendesak yang memerlukan perhatian segera
                     </p>
                     <p className="font-semibold text-destructive">
                       (555) 911-0000
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Available 24/7 for emergencies only
+                      Tersedia 24/7 untuk keadaan darurat saja
                     </p>
                   </div>
                 </div>

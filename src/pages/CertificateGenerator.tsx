@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Download, Eye } from "lucide-react";
 import jsPDF from "jspdf";
+import logoKabJepara from "@/assets/logo-kab-jepara.png";
 
 type CertificateType = "business" | "indigency" | "introductory";
 
@@ -69,7 +70,7 @@ const CertificateGenerator = () => {
     const typePrefix = {
       business: "510",
       indigency: "440", 
-      introductory: "474.6"
+      introductory: "474.4"
     };
     
     return `${typePrefix[type]} / ${sequentialNumber.toString().padStart(3, '0')} / ${romanMonth} / ${year}`;
@@ -99,7 +100,8 @@ const CertificateGenerator = () => {
     yPosition += 8;
     doc.text("DESA DERMOLO", pageWidth / 2, yPosition, { align: "center" });
     yPosition += 8;
-    
+    doc.addImage(logoKabJepara, "PNG", 20, 25, 30, 35);
+
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.text("Alamat: Jl.Beringin No.01 Dermolo 59453", pageWidth / 2, yPosition, { align: "center" });
@@ -655,11 +657,16 @@ const CertificateGenerator = () => {
               <CardContent className="p-8">
                 <div className="max-w-2xl mx-auto space-y-6 font-serif">
                   {/* Header */}
-                  <div className="text-center border-b pb-4">
-                    <h2 className="text-lg font-bold">PEMERINTAH KABUPATEN JEPARA</h2>
-                    <h3 className="text-lg font-bold">KECAMATAN KEMBANG</h3>
-                    <h3 className="text-lg font-bold">DESA DERMOLO</h3>
-                    <p className="text-sm">Alamat: Jl.Beringin No.01 Dermolo 59453</p>
+                  <div className="border-b pb-4 flex w-full">
+                    <div className="w-1/4">
+                      <img src={logoKabJepara} alt="Logo Kabupaten Jepara" width={80} height={80} />
+                    </div>
+                    <div className="text-center w-full">
+                      <h2 className="text-lg font-bold">PEMERINTAH KABUPATEN JEPARA</h2>
+                      <h3 className="text-lg font-bold">KECAMATAN KEMBANG</h3>
+                      <h3 className="text-lg font-bold">DESA DERMOLO</h3>
+                      <p className="text-sm">Alamat: Jl.Beringin No.01 Dermolo 59453</p>
+                    </div>
                   </div>
 
                   {/* Letter Number and Date */}

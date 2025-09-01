@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Calendar, Bell, Users, Phone, FileText, MapPin } from "lucide-react";
-import villageHero from "@/assets/village-hero.jpg";
+import villageHero from "@/assets/desa-dermolo.png";
 
 const Index = () => {
   const quickLinks = [
@@ -10,28 +10,28 @@ const Index = () => {
       icon: Calendar,
       title: "Acara Mendatang",
       description: "Lihat acara dan kegiatan komunitas",
-      href: "/events",
+      href: "/acara",
       color: "text-village-blue"
     },
     {
       icon: Bell,
       title: "Pengumuman",
       description: "Tetap update dengan berita desa",
-      href: "/announcements",
+      href: "/pengumuman",
       color: "text-village-green"
     },
     {
       icon: Users,
       title: "Tentang Desa Kami",
       description: "Pelajari tentang komunitas kami",
-      href: "/about",
+      href: "/tentang",
       color: "text-village-amber"
     },
     {
       icon: Phone,
       title: "Hubungi Kami",
       description: "Hubungi kantor desa",
-      href: "/contact",
+      href: "/kontak",
       color: "text-primary"
     }
   ];
@@ -43,29 +43,25 @@ const Index = () => {
         <img 
           src={villageHero} 
           alt="Beautiful village landscape with traditional buildings and rolling hills"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-fit"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/30 flex items-center">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-6">
             <div className="max-w-2xl text-white">
               <h1 className="text-4xl lg:text-6xl font-bold mb-4 animate-fade-in">
                 Selamat Datang di Desa Dermolo
               </h1>
-              <p className="text-lg lg:text-xl mb-8 animate-slide-up">
-                Komunitas yang berkembang yang didedikasikan untuk melestarikan warisan kami sambil merangkul masa depan. 
-                Tetap terhubung dengan segala yang terjadi di desa indah kami.
-              </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/events">
+                <Link to="/acara">
                   <Button size="lg" className="w-full sm:w-auto">
                     <Calendar className="w-5 h-5 mr-2" />
                     Lihat Acara
                   </Button>
                 </Link>
-                <Link to="/certificate">
+                <Link to="/surat">
                   <Button variant="secondary" size="lg" className="w-full sm:w-auto">
                     <FileText className="w-5 h-5 mr-2" />
-                    Buat Sertifikat
+                    Buat Surat
                   </Button>
                 </Link>
               </div>
@@ -110,20 +106,18 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold mb-6">Hidup di Komunitas Kami</h2>
+              <h2 className="text-3xl font-bold mb-6">Masyarakat Desa Dermolo</h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                Desa kami menggabungkan pesona kehidupan tradisional dengan kemudahan modern. 
-                Kami bangga dengan komunitas yang erat, lingkungan alam yang indah, dan 
-                komitmen terhadap pembangunan berkelanjutan.
+                Masyarakat Desa Dermolo selalu menunjukan antusiasme tinggi dalam setiap kegiatan bersama, mulai dari kerja bakti hingga acara desa. Lingkungan yang bersih dan terjaga rapih menjadi bukti kepedualian warga terhadap kenyamanan dan kelestarian desa.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <MapPin className="w-5 h-5 text-village-blue" />
-                  <span>Terletak di jantung pedesaan yang indah</span>
+                  <span>Terletak di Kecamtan Kembang, Kabupaten Jepara</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Users className="w-5 h-5 text-village-green" />
-                  <span>Populasi warga yang ramah dan terlibat aktif</span>
+                  <span>Komunitas warga yang ramah dan terlibat aktif</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Calendar className="w-5 h-5 text-village-amber" />
@@ -131,7 +125,7 @@ const Index = () => {
                 </div>
               </div>
               <div className="mt-8">
-                <Link to="/about">
+                <Link to="/tentang">
                   <Button variant="outline" size="lg">
                     Pelajari Lebih Lanjut Tentang Kami
                   </Button>
@@ -160,7 +154,7 @@ const Index = () => {
                       <span>kantor@desadermolo.id</span>
                     </div>
                   </div>
-                  <Link to="/contact" className="block">
+                  <Link to="/kontak" className="block">
                     <Button className="w-full">
                       <Phone className="w-4 h-4 mr-2" />
                       Hubungi Kami
