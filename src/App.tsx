@@ -21,7 +21,12 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <div className="min-h-screen bg-background">
           <Navigation />
           <main>
@@ -30,7 +35,7 @@ const App = () => (
               <Route path="/tentang" element={<About />} />
               <Route path="/kontak" element={<Contact />} />
               <Route path="/acara" element={<Events />} />
-              <Route path="/acara/:id" element={<EventDetail />} />
+              <Route path="/acara/:slug" element={<EventDetail />} />
               <Route path="/pengumuman" element={<Announcements />} />
               <Route path="/pengumuman/:id" element={<AnnouncementDetail />} />
               <Route path="/surat" element={<CertificateGenerator />} />

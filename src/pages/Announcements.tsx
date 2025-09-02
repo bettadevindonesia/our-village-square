@@ -119,7 +119,7 @@ const Announcements = () => {
                   <p className="text-muted-foreground leading-relaxed mb-4">
                     {announcement.content}
                   </p>
-                  <Link to={`/announcements/${announcement.id}`}>
+                  <Link to={`/pengumuman/${announcement.id}`}>
                     <Button variant="outline" className="w-full">
                       Baca Selengkapnya
                       <ArrowRight className="w-4 h-4 ml-2" />
