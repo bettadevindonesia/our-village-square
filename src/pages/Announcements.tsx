@@ -1,11 +1,25 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mockAnnouncements } from "@/data/mockData";
-import { Bell, AlertTriangle, Info, Calendar, Wrench, AlertCircle, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery } from "@/lib/tursoUtils";
+import { mapDatabaseResult } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
 import { id } from "date-fns/locale";
+import { AlertCircle, AlertTriangle, ArrowRight, Bell, Calendar, Info, Wrench } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+
+export interface AnnouncementProps {
+  id: string;
+  slug: string;
+  title: string;
+  content: string;
+  notes: string;
+  additional_info: string[];
+  published_at: Date;
+  priority: "high" | "medium" | "low";
+  category: "general" | "urgent" | "maintenance" | "event";
+}
 
 const Announcements = () => {
   const getPriorityLabel = (priority: string) => {
@@ -37,7 +51,7 @@ const Announcements = () => {
 
   const getCategoryLabel = (category: string) => {
     switch (category) {
-      case "emergency": return "Darurat";
+      case "urgent": return "Darurat";
       case "maintenance": return "Pemeliharaan";
       case "general": return "Umum";
       case "event": return "Acara";
@@ -47,7 +61,7 @@ const Announcements = () => {
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case "emergency": return AlertCircle;
+      case "urgent": return AlertCircle;
       case "maintenance": return Wrench;
       case "event": return Calendar;
       case "general": return Info;
@@ -57,7 +71,7 @@ const Announcements = () => {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case "emergency": return "bg-destructive/10 text-destructive border-destructive/20";
+      case "urgent": return "bg-destructive/10 text-destructive border-destructive/20";
       case "maintenance": return "bg-village-amber/10 text-village-amber border-village-amber/20";
       case "event": return "bg-village-green/10 text-village-green border-village-green/20";
       case "general": return "bg-primary/10 text-primary border-primary/20";
@@ -65,10 +79,58 @@ const Announcements = () => {
     }
   };
 
-  // Sort announcements by date (newest first)
-  const sortedAnnouncements = [...mockAnnouncements].sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+  const [announcements, setAnnouncements] = useState<AnnouncementProps[] | []>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchAnnouncements = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const announcementData = await useQuery("SELECT * FROM announcements");
+        if (announcementData && isMounted) {
+          const announcementDataMap = mapDatabaseResult<AnnouncementProps>(announcementData);
+          setAnnouncements(announcementDataMap);
+        }
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnnouncements();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-village-blue"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-village-blue text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="py-8">
@@ -83,11 +145,11 @@ const Announcements = () => {
 
         {/* Announcements List */}
         <div className="space-y-6 max-w-4xl mx-auto">
-          {sortedAnnouncements.map((announcement) => {
+          {announcements.map((announcement: AnnouncementProps) => {
             const PriorityIcon = getPriorityIcon(announcement.priority);
             const CategoryIcon = getCategoryIcon(announcement.category);
-            const announcementDate = parseISO(announcement.date);
-            
+            const announcementDate = parseISO(announcement.published_at.toString());
+
             return (
               <Card 
                 key={announcement.id} 
@@ -119,7 +181,7 @@ const Announcements = () => {
                   <p className="text-muted-foreground leading-relaxed mb-4">
                     {announcement.content}
                   </p>
-                  <Link to={`/pengumuman/${announcement.id}`}>
+                  <Link to={`/pengumuman/${announcement.slug}`}>
                     <Button variant="outline" className="w-full">
                       Baca Selengkapnya
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -132,7 +194,7 @@ const Announcements = () => {
         </div>
 
         {/* Empty State */}
-        {sortedAnnouncements.length === 0 && (
+        {announcements.length === 0 && (
           <div className="text-center py-16">
             <Bell className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">Tidak ada pengumuman</h3>

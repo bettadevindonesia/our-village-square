@@ -37,7 +37,7 @@ const App = () => (
               <Route path="/acara" element={<Events />} />
               <Route path="/acara/:slug" element={<EventDetail />} />
               <Route path="/pengumuman" element={<Announcements />} />
-              <Route path="/pengumuman/:id" element={<AnnouncementDetail />} />
+              <Route path="/pengumuman/:slug" element={<AnnouncementDetail />} />
               <Route path="/surat" element={<CertificateGenerator />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

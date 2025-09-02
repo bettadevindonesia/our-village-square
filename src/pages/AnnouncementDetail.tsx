@@ -2,18 +2,151 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, AlertTriangle, Info, Wrench, Megaphone } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  AlertTriangle,
+  Info,
+  Wrench,
+  Megaphone,
+} from "lucide-react";
 import { mockAnnouncements } from "@/data/mockData";
+import { Key, useEffect, useState } from "react";
+import { AnnouncementProps } from "./Announcements";
+import { useQuery } from "@/lib/tursoUtils";
+import { mapDatabaseResult } from "@/lib/utils";
 
 const AnnouncementDetail = () => {
-  const { id } = useParams();
-  const announcement = mockAnnouncements.find(a => a.id === id);
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return "Tinggi";
+      case "medium":
+        return "Sedang";
+      case "low":
+        return "Rendah";
+      default:
+        return priority;
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return "bg-red-100 text-red-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "low":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "urgent":
+        return AlertTriangle;
+      case "maintenance":
+        return Wrench;
+      case "general":
+        return Info;
+      case "event":
+        return Megaphone;
+      default:
+        return Info;
+    }
+  };
+
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case "urgent":
+        return "Darurat";
+      case "maintenance":
+        return "Pemeliharaan";
+      case "general":
+        return "Umum";
+      case "event":
+        return "Acara";
+      default:
+        return category;
+    }
+  };
+
+  const { slug } = useParams();
+
+  const [announcement, setAnnouncement] = useState<AnnouncementProps | null>(
+    null
+  );
+  const CategoryIcon = getCategoryIcon(announcement?.category);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchAnnouncement = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const announcementData = await useQuery<AnnouncementProps>(
+          `SELECT * FROM announcements WHERE slug = '${slug}'`
+        );
+
+        if (announcementData && isMounted) {
+          const announcementDataMap =
+            mapDatabaseResult<AnnouncementProps>(announcementData);
+          console.log(announcementDataMap);
+          setAnnouncement(announcementDataMap[0] || null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError("Failed to load data. Please try again later.");
+          console.error("Error fetching data:", err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    fetchAnnouncement();
+    return () => {
+      isMounted = false;
+    };
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-village-blue"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-village-blue text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!announcement) {
     return (
       <div className="py-8">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-2xl font-bold mb-4">Pengumuman Tidak Ditemukan</h1>
+          <h1 className="text-2xl font-bold mb-4">
+            Pengumuman Tidak Ditemukan
+          </h1>
           <Link to="/pengumuman">
             <Button>
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -24,46 +157,6 @@ const AnnouncementDetail = () => {
       </div>
     );
   }
-
-  const getPriorityLabel = (priority: string) => {
-    switch (priority) {
-      case "high": return "Tinggi";
-      case "medium": return "Sedang";
-      case "low": return "Rendah";
-      default: return priority;
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high": return "bg-red-100 text-red-800";
-      case "medium": return "bg-yellow-100 text-yellow-800";
-      case "low": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case "emergency": return AlertTriangle;
-      case "maintenance": return Wrench;
-      case "general": return Info;
-      case "event": return Megaphone;
-      default: return Info;
-    }
-  };
-
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case "emergency": return "Darurat";
-      case "maintenance": return "Pemeliharaan";
-      case "general": return "Umum";
-      case "event": return "Acara";
-      default: return category;
-    }
-  };
-
-  const CategoryIcon = getCategoryIcon(announcement.category);
 
   return (
     <div className="py-8">
@@ -88,12 +181,15 @@ const AnnouncementDetail = () => {
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4 mr-1" />
-                  {new Date(announcement.date).toLocaleDateString('id-ID', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
+                  {new Date(announcement.published_at).toLocaleDateString(
+                    "id-ID",
+                    {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    }
+                  )}
                 </div>
               </div>
               <CardTitle className="text-3xl font-bold mb-4 flex items-center">
@@ -109,14 +205,22 @@ const AnnouncementDetail = () => {
               </div>
 
               <div className="border-t pt-6">
-                <h3 className="text-xl font-semibold mb-4">Kategori & Status</h3>
+                <h3 className="text-xl font-semibold mb-4">
+                  Kategori & Status
+                </h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">Kategori</p>
-                    <p className="text-lg">{getCategoryLabel(announcement.category)}</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Kategori
+                    </p>
+                    <p className="text-lg">
+                      {getCategoryLabel(announcement.category)}
+                    </p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">Tingkat Prioritas</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Tingkat Prioritas
+                    </p>
                     <Badge className={getPriorityColor(announcement.priority)}>
                       {getPriorityLabel(announcement.priority)}
                     </Badge>
@@ -124,20 +228,26 @@ const AnnouncementDetail = () => {
                 </div>
               </div>
 
-              {announcement.category === "maintenance" && (
+              {announcement.additional_info && (
                 <div className="border-t pt-6">
-                  <h3 className="text-xl font-semibold mb-4">Informasi Pemeliharaan</h3>
+                  <h3 className="text-xl font-semibold mb-4">
+                    Informasi Pemeliharaan
+                  </h3>
                   <div className="space-y-2 text-sm text-muted-foreground">
-                    <p>• Pekerjaan akan dilakukan oleh tim teknisi bersertifikat</p>
-                    <p>• Warga dimohon untuk mempersiapkan cadangan sebelumnya</p>
-                    <p>• Hubungi kantor desa jika ada gangguan di luar jadwal</p>
+                    {JSON.parse(
+                      announcement.additional_info.toString() || "[]"
+                    ).map((info: string, index: Key) => (
+                      <p key={index}>• {info}</p>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {announcement.category === "emergency" && (
+              {announcement.category === "urgent" && (
                 <div className="border-t pt-6">
-                  <h3 className="text-xl font-semibold mb-4 text-red-600">Kontak Darurat</h3>
+                  <h3 className="text-xl font-semibold mb-4 text-red-600">
+                    Kontak Darurat
+                  </h3>
                   <div className="space-y-2 text-sm">
                     <p>• Kantor Desa: (0291) 123-456</p>
                     <p>• Kepala Desa: 0812-3456-7890</p>
@@ -147,21 +257,19 @@ const AnnouncementDetail = () => {
                 </div>
               )}
 
-              <div className="border-t pt-6">
-                <div className="bg-muted p-4 rounded-lg">
-                  <p className="text-sm text-muted-foreground">
-                    <strong>Catatan:</strong> Pengumuman ini dikeluarkan oleh Pemerintah Desa Dermolo. 
-                    Untuk informasi lebih lanjut, silakan hubungi kantor desa pada jam kerja 
-                    (Senin-Jumat, 08:00-16:00 WIB).
-                  </p>
+              {announcement.notes && (
+                <div className="border-t pt-6">
+                  <div className="bg-muted p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      <strong>Catatan:</strong> {announcement.notes}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="border-t pt-6">
                 <div className="flex gap-4">
-                  <Button className="flex-1">
-                    Bagikan Pengumuman
-                  </Button>
+                  <Button className="flex-1">Bagikan Pengumuman</Button>
                   <Button variant="outline" className="flex-1">
                     Cetak Pengumuman
                   </Button>
