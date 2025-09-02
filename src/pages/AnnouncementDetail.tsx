@@ -1,20 +1,19 @@
-import { useParams, Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  ArrowLeft,
-  Calendar,
-  AlertTriangle,
-  Info,
-  Wrench,
-  Megaphone,
-} from "lucide-react";
-import { mockAnnouncements } from "@/data/mockData";
-import { Key, useEffect, useState } from "react";
-import { AnnouncementProps } from "./Announcements";
 import { useQuery } from "@/lib/tursoUtils";
 import { mapDatabaseResult } from "@/lib/utils";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Calendar,
+  Info,
+  Megaphone,
+  Wrench,
+} from "lucide-react";
+import { Key, useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { AnnouncementProps } from "./Announcements";
 
 const AnnouncementDetail = () => {
   const getPriorityLabel = (priority: string) => {
