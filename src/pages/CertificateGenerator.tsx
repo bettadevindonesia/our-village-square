@@ -687,19 +687,49 @@ const CertificateGenerator = () => {
                   {/* Content */}
                   <div className="space-y-4">
                     <p>Yang bertanda tangan di bawah ini:</p>
-                    <div className="ml-4 space-y-1">
-                      <p>Nama : RIYATI</p>
-                      <p>Jabatan : Petinggi Dermolo</p>
+                    <div className="ml-4">
+                      <table className="table-auto w-full">
+                        <tbody>
+                          <tr>
+                            <td className="pr-6">Nama</td>
+                            <td className="pl-6">: RIYATI</td>
+                          </tr>
+                          <tr>
+                            <td className="pr-6">Jabatan</td>
+                            <td className="pl-6">: Petinggi Dermolo</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                     
                     <p>Dengan ini menerangkan bahwa:</p>
-                    <div className="ml-4 space-y-1">
-                      <p>Nama : {formData.applicantName}</p>
-                      {formData.placeOfBirth && formData.dateOfBirth && (
-                        <p>Tempat/Tgl Lahir : {formData.placeOfBirth}, {new Date(formData.dateOfBirth).toLocaleDateString('id-ID')}</p>
-                      )}
-                      {formData.occupation && <p>Pekerjaan : {formData.occupation}</p>}
-                      {formData.address && <p>Alamat : {formData.address}</p>}
+                    <div className="ml-4">
+                      <table className="table-auto w-full">
+                        <tbody>
+                          <tr>
+                            <td className="pr-2">Nama</td>
+                            <td className="pl-2">: {formData.applicantName}</td>
+                          </tr>
+                          {formData.placeOfBirth && formData.dateOfBirth && (
+                            <tr>
+                              <td className="pr-2">Tempat/Tgl Lahir</td>
+                              <td className="pl-2">: {`${formData.placeOfBirth}, ${new Date(formData.dateOfBirth).toLocaleDateString('id-ID')}`}</td>
+                            </tr>
+                          )}
+                          {formData.occupation && (
+                            <tr>
+                              <td className="pr-2">Pekerjaan</td>
+                              <td className="pl-2">: {formData.occupation}</td>
+                            </tr>
+                          )}
+                          {formData.address && (
+                            <tr>
+                              <td className="pr-2">Alamat</td>
+                              <td className="pl-2">: {formData.address}</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
                     </div>
 
                     {/* Type-specific content preview */}
@@ -707,11 +737,28 @@ const CertificateGenerator = () => {
                       {formData.certificateType === "business" && (
                         <div>
                           <p>Adalah benar penduduk Desa Dermolo yang menjalankan usaha:</p>
-                          <div className="ml-4 space-y-1 mt-2">
-                            {formData.businessName && <p>Nama Usaha : {formData.businessName}</p>}
-                            {formData.businessType && <p>Jenis Usaha : {formData.businessType}</p>}
-                            {formData.businessYears && <p>Lama Usaha : {formData.businessYears} tahun</p>}
-                          </div>
+                          <table className="table-auto w-full mt-2">
+                            <tbody>
+                              {formData.businessName && (
+                                <tr>
+                                  <td className="pr-2">Nama Usaha</td>
+                                  <td className="pl-2">: {formData.businessName}</td>
+                                </tr>
+                              )}
+                              {formData.businessType && (
+                                <tr>
+                                  <td className="pr-2">Jenis Usaha</td>
+                                  <td className="pl-2">: {formData.businessType}</td>
+                                </tr>
+                              )}
+                              {formData.businessYears && (
+                                <tr>
+                                  <td className="pr-2">Lama Usaha</td>
+                                  <td className="pl-2">: {formData.businessYears} tahun</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
                         </div>
                       )}
                       
@@ -719,9 +766,14 @@ const CertificateGenerator = () => {
                         <div>
                           <p>Adalah benar penduduk Desa Dermolo yang termasuk dalam kategori keluarga tidak mampu secara ekonomi.</p>
                           {formData.purpose && (
-                            <div className="ml-4 mt-2">
-                              <p>Keperluan : {formData.purpose}</p>
-                            </div>
+                            <table className="table-auto w-full mt-2">
+                              <tbody>
+                                <tr>
+                                  <td className="pr-2">Keperluan</td>
+                                  <td className="pl-2">: {formData.purpose}</td>
+                                </tr>
+                              </tbody>
+                            </table>
                           )}
                         </div>
                       )}
@@ -730,9 +782,14 @@ const CertificateGenerator = () => {
                         <div>
                           <p>Adalah benar penduduk Desa Dermolo yang berkelakuan baik dan tidak pernah terlibat dalam kegiatan yang melanggar hukum.</p>
                           {formData.purpose && (
-                            <div className="ml-4 mt-2">
-                              <p>Keperluan : {formData.purpose}</p>
-                            </div>
+                            <table className="table-auto w-full mt-2">
+                              <tbody>
+                                <tr>
+                                  <td className="pr-2">Keperluan</td>
+                                  <td className="pl-2">: {formData.purpose}</td>
+                                </tr>
+                              </tbody>
+                            </table>
                           )}
                         </div>
                       )}
