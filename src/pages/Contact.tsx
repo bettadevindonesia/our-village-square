@@ -1,62 +1,106 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { Phone, Mail, MapPin, Clock, Send } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { useQuery } from "@/lib/tursoUtils";
+import { mapDatabaseResult } from "@/lib/utils";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { useEffect, useState } from "react";
+
+type AppSettings = {
+  setting_key: string;
+  setting_value: string;
+  description: string;
+};
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "",
-    message: ""
-  });
-  const { toast } = useToast();
+  const [infoMap, setInfoMap] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  useEffect(() => {
+    let isMounted = true;
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Mock form submission
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for contacting us. We'll get back to you within 24 hours.",
-    });
-    setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
-  };
+        // Fetch both datasets in parallel for better performance
+        const contactInfo = await useQuery(
+          "SELECT setting_key, setting_value, description FROM settings WHERE setting_key IN ('contact_telepon', 'contact_email', 'contact_alamat', 'contact_jam_kerja', 'contact_darurat')"
+        );
+
+        if (contactInfo && isMounted) {
+          const contactInfoMap = mapDatabaseResult<AppSettings>(contactInfo);
+          const infoMap = {};
+          contactInfoMap.forEach((item) => {
+            infoMap[item.setting_key] = item.setting_value;
+          });
+          setInfoMap(infoMap);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError("Failed to load data. Please try again later.");
+          console.error("Error fetching data:", err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    fetchData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-village-blue"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-village-blue text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const contactInfo = [
     {
       icon: Phone,
       title: "Telepon",
-      details: ["(555) 123-4567", "Sesuai jam kerja"],
-      color: "text-village-blue"
+      details: JSON.parse(infoMap["contact_telepon"] || "[]"),
+      color: "text-village-blue",
     },
     {
       icon: Mail,
       title: "Email",
-      details: ["office@village.gov", "info@village.gov"],
-      color: "text-village-green"
+      details: JSON.parse(infoMap["contact_email"] || "[]"),
+      color: "text-village-green",
     },
     {
       icon: MapPin,
       title: "Alamat",
-      details: ["Jl. Beringin Raya No. 1 RT 03/RW 01", "Dermolo, Kec. Kembang, Kab. Jepara, 59453"],
-      color: "text-village-amber"
+      details: JSON.parse(infoMap["contact_alamat"] || "[]"),
+      color: "text-village-amber",
     },
     {
       icon: Clock,
       title: "Jam Kerja",
-      details: ["Senin - Kamis: 8:00 WIB - 16:00 WIB", "Jumat: 8:00 WIB - 11:00 WIB", "Sabtu: 8:00 WIB - 16:00 WIB"],
-      color: "text-primary"
-    }
+      details: JSON.parse(infoMap["contact_jam_kerja"] || "[]"),
+      color: "text-primary",
+    },
   ];
 
   return (
@@ -66,8 +110,8 @@ const Contact = () => {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Kontak Kami</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Hubungi kami di pemerintahan desa. Kami di sini untuk membantu dengan pertanyaan, 
-            kekhawatiran, dan saran Anda.
+            Hubungi kami di pemerintahan desa. Kami di sini untuk membantu
+            dengan pertanyaan, kekhawatiran, dan saran Anda.
           </p>
         </div>
 
@@ -75,11 +119,14 @@ const Contact = () => {
           {/* Contact Information */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold mb-6 text-center">Hubungi Kami</h2>
+              <h2 className="text-2xl font-bold mb-6 text-center">
+                Hubungi Kami
+              </h2>
               <p className="text-muted-foreground mb-8">
-                Kami selalu senang mendengar dari warga kami. Apakah Anda memiliki pertanyaan tentang
-                layanan desa, ingin melaporkan masalah, atau memiliki saran untuk perbaikan,
-                jangan ragu untuk menghubungi kami.
+                Kami selalu senang mendengar dari warga kami. Apakah Anda
+                memiliki pertanyaan tentang layanan desa, ingin melaporkan
+                masalah, atau memiliki saran untuk perbaikan, jangan ragu untuk
+                menghubungi kami.
               </p>
             </div>
 
@@ -96,7 +143,10 @@ const Contact = () => {
                         <div>
                           <h3 className="font-semibold mb-2">{info.title}</h3>
                           {info.details.map((detail, index) => (
-                            <p key={index} className="text-sm text-muted-foreground">
+                            <p
+                              key={index}
+                              className="text-sm text-muted-foreground"
+                            >
                               {detail}
                             </p>
                           ))}
@@ -116,12 +166,14 @@ const Contact = () => {
                     <Phone className="w-5 h-5 text-destructive" />
                   </div>
                   <div>
-                    <h3 className="font-semibold mb-2 text-destructive">Kontak Darurat</h3>
+                    <h3 className="font-semibold mb-2 text-destructive">
+                      Kontak Darurat
+                    </h3>
                     <p className="text-sm text-muted-foreground">
                       Untuk masalah mendesak yang memerlukan perhatian segera
                     </p>
                     <p className="font-semibold text-destructive">
-                      (555) 911-0000
+                      {infoMap["contact_darurat"] || "Tidak tersedia"}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Tersedia 24/7 untuk keadaan darurat saja
