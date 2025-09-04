@@ -85,7 +85,6 @@ const About = () => {
           useQuery("SELECT setting_key, setting_value, description FROM settings WHERE setting_key IN ('sejarah_title', 'sejarah_p1', 'sejarah_p2', 'sejarah_p3')")
         ]);
 
-
         if (officialResults && statsResults && sejarahResults && isMounted) {
           const dataOfficial = mapDatabaseResult<OfficialData[]>(officialResults);
           const dataStats = mapDatabaseResult<StatSettings>(statsResults);

@@ -9,7 +9,7 @@ const Footer: React.FC = () => (
       <div className="flex items-center gap-2">
         <span>Made with</span>
         <span className="text-red-500">♥</span>
-        <span>by <a href="https://bettadevindonesia.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">BettaDev Indonesia</a></span>
+        <span>by <a href="https://github.com/darkterminal" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">BettaDev Indonesia</a></span>
       </div>
       <div>
         <a href="/about" className="underline hover:text-primary">About</a> | <a href="/contact" className="underline hover:text-primary">Contact</a>

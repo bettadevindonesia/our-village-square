@@ -1,18 +1,21 @@
-import { useState } from "react";
+import logoKabJepara from "@/assets/logo-kab-jepara.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Download, Eye } from "lucide-react";
+import { useFreshQuery } from "@/lib/tursoUtils";
+import { mapDatabaseResult } from "@/lib/utils";
 import jsPDF from "jspdf";
-import logoKabJepara from "@/assets/logo-kab-jepara.png";
+import { Download, Eye, FileText } from "lucide-react";
+import { useEffect, useState } from "react";
 
-type CertificateType = "business" | "indigency" | "introductory";
+type CertificateType = "surat_keterangan_usaha" | "surat_keterangan_tidak_mampu" | "surat_keterangan_pengantar";
 
 interface FormData {
+  document_number?: string;
   certificateType: CertificateType | "";
   applicantName: string;
   placeOfBirth: string;
@@ -35,6 +38,13 @@ interface FormData {
   remarks?: string;
 }
 
+interface DocumentSequence {
+  id: number;
+  certificate_type: string;
+  current_number: number;
+  prefix_code: string;
+}
+
 const CertificateGenerator = () => {
   const [formData, setFormData] = useState<FormData>({
     certificateType: "",
@@ -48,6 +58,50 @@ const CertificateGenerator = () => {
   });
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [docNumberSequence, setDocNumberSequence] = useState<DocumentSequence[]>([]);
+  const [currentCouncil, setCurrentCouncil] = useState<string>("");
+  const [officialAddress, setOfficialAddress] = useState<string>("");
+
+  useEffect(() => {
+    let isMounted = true;
+    const preparedData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const docSequence = await useFreshQuery("SELECT * FROM document_sequences");
+        const currentCouncil = await useFreshQuery("SELECT name FROM officials WHERE position = 'Petinggi Dermolo'");
+        const officialAddress = await useFreshQuery("SELECT setting_key, setting_value FROM settings WHERE setting_key = 'contact_alamat'");
+
+        if (docSequence && currentCouncil && officialAddress && isMounted) {
+          const docSequenceMap = mapDatabaseResult<DocumentSequence>(docSequence);
+          setDocNumberSequence(docSequenceMap);
+
+          const currentCouncilMap = mapDatabaseResult<{ name: string }>(currentCouncil);
+          setCurrentCouncil(currentCouncilMap[0].name);
+
+          const officialAddressMap = mapDatabaseResult<{ setting_value: string }>(officialAddress);
+          setOfficialAddress(JSON.parse(officialAddressMap[0].setting_value.toString()).join(", "));
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError("Failed to load data. Please try again later.");
+          console.error("Error fetching data:", err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    preparedData();
+
+    return () => { isMounted = false; };
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -62,17 +116,13 @@ const CertificateGenerator = () => {
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
-    const sequentialNumber = Math.floor(Math.random() * 999) + 1;
-    
+    const sequentialNumber = docNumberSequence.find(seq => seq.certificate_type === type)?.current_number + 1;
+
     const romanNumerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const romanMonth = romanNumerals[month - 1];
-    
-    const typePrefix = {
-      business: "510",
-      indigency: "440", 
-      introductory: "474.4"
-    };
-    
+
+    const typePrefix = Object.fromEntries(docNumberSequence.map(seq => [seq.certificate_type, seq.prefix_code]));
+
     return `${typePrefix[type]} / ${sequentialNumber.toString().padStart(3, '0')} / ${romanMonth} / ${year}`;
   };
 
@@ -85,6 +135,10 @@ const CertificateGenerator = () => {
       });
       return;
     }
+
+    // Letter number and date
+    const letterNumber = generateLetterNumber(formData.certificateType as CertificateType);
+    formData.document_number = letterNumber;
 
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.width;
@@ -104,7 +158,7 @@ const CertificateGenerator = () => {
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text("Alamat: Jl.Beringin No.01 Dermolo 59453", pageWidth / 2, yPosition, { align: "center" });
+    doc.text(`Alamat: ${officialAddress}`, pageWidth / 2, yPosition, { align: "center" });
     yPosition += 15;
 
     // Separator line
@@ -112,8 +166,6 @@ const CertificateGenerator = () => {
     doc.line(margin, yPosition, pageWidth - margin, yPosition);
     yPosition += 15;
 
-    // Letter number and date
-    const letterNumber = generateLetterNumber(formData.certificateType as CertificateType);
     doc.setFontSize(12);
     doc.text(`Nomor: ${letterNumber}`, margin, yPosition);
     doc.text(`Dermolo, ${new Date().toLocaleDateString('id-ID')}`, pageWidth - margin - 60, yPosition);
@@ -124,13 +176,13 @@ const CertificateGenerator = () => {
     doc.setFont("helvetica", "bold");
     let title = "";
     switch (formData.certificateType) {
-      case "business":
+      case "surat_keterangan_usaha":
         title = "SURAT KETERANGAN USAHA";
         break;
-      case "indigency":
+      case "surat_keterangan_tidak_mampu":
         title = "SURAT KETERANGAN TIDAK MAMPU";
         break;
-      case "introductory":
+      case "surat_keterangan_pengantar":
         title = "SURAT KETERANGAN PENGANTAR";
         break;
     }
@@ -144,7 +196,7 @@ const CertificateGenerator = () => {
     yPosition += 10;
 
     doc.text("Nama", margin + 10, yPosition);
-    doc.text(": RIYATI", margin + 50, yPosition);
+    doc.text(`: ${currentCouncil}`, margin + 50, yPosition);
     yPosition += 8;
     doc.text("Jabatan", margin + 10, yPosition);
     doc.text(": Petinggi Dermolo", margin + 50, yPosition);
@@ -183,7 +235,7 @@ const CertificateGenerator = () => {
 
     // Type-specific content
     yPosition += 5;
-    if (formData.certificateType === "business") {
+    if (formData.certificateType === "surat_keterangan_usaha") {
       doc.text("Adalah benar penduduk Desa Dermolo yang menjalankan usaha:", margin, yPosition);
       yPosition += 10;
       if (formData.businessName) {
@@ -201,7 +253,7 @@ const CertificateGenerator = () => {
         doc.text(`: ${formData.businessYears} tahun`, margin + 50, yPosition);
         yPosition += 8;
       }
-    } else if (formData.certificateType === "indigency") {
+    } else if (formData.certificateType === "surat_keterangan_tidak_mampu") {
       doc.text("Adalah benar penduduk Desa Dermolo yang termasuk dalam kategori", margin, yPosition);
       yPosition += 8;
       doc.text("keluarga tidak mampu secara ekonomi.", margin, yPosition);
@@ -211,7 +263,7 @@ const CertificateGenerator = () => {
         doc.text(`: ${formData.purpose}`, margin + 50, yPosition);
         yPosition += 8;
       }
-    } else if (formData.certificateType === "introductory") {
+    } else if (formData.certificateType === "surat_keterangan_pengantar") {
       doc.text("Adalah benar penduduk Desa Dermolo yang berkelakuan baik", margin, yPosition);
       yPosition += 8;
       doc.text("dan tidak pernah terlibat dalam kegiatan yang melanggar hukum.", margin, yPosition);
@@ -321,7 +373,7 @@ const CertificateGenerator = () => {
           </div>
           <div className="space-y-2">
             <Label htmlFor="occupation">Pekerjaan</Label>
-            {formData.certificateType === "indigency" ? (
+            {formData.certificateType === "surat_keterangan_tidak_mampu" ? (
               <Select value={formData.occupation} onValueChange={(value) => handleSelectChange("occupation", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih pekerjaan" />
@@ -362,7 +414,7 @@ const CertificateGenerator = () => {
         </div>
 
         {/* Type-specific fields */}
-        {formData.certificateType === "business" && (
+        {formData.certificateType === "surat_keterangan_usaha" && (
           <div className="space-y-6 border-t pt-6">
             <h3 className="text-lg font-semibold">Informasi Usaha</h3>
             <div className="grid md:grid-cols-2 gap-6">
@@ -413,7 +465,7 @@ const CertificateGenerator = () => {
           </div>
         )}
 
-        {formData.certificateType === "indigency" && (
+        {formData.certificateType === "surat_keterangan_tidak_mampu" && (
           <div className="space-y-6 border-t pt-6">
             <h3 className="text-lg font-semibold">Informasi Tambahan</h3>
             <div className="grid md:grid-cols-2 gap-6">
@@ -460,7 +512,7 @@ const CertificateGenerator = () => {
           </div>
         )}
 
-        {formData.certificateType === "introductory" && (
+        {formData.certificateType === "surat_keterangan_pengantar" && (
           <div className="space-y-6 border-t pt-6">
             <h3 className="text-lg font-semibold">Informasi Tambahan</h3>
             <div className="grid md:grid-cols-2 gap-6">
@@ -578,6 +630,30 @@ const CertificateGenerator = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-village-blue"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-village-blue text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="py-8">
       <div className="container mx-auto px-4">
@@ -609,9 +685,9 @@ const CertificateGenerator = () => {
                       <SelectValue placeholder="Pilih jenis surat" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="business">Surat Keterangan Usaha</SelectItem>
-                      <SelectItem value="indigency">Surat Keterangan Tidak Mampu</SelectItem>
-                      <SelectItem value="introductory">Surat Keterangan Pengantar</SelectItem>
+                      <SelectItem value="surat_keterangan_usaha">Surat Keterangan Usaha</SelectItem>
+                      <SelectItem value="surat_keterangan_tidak_mampu">Surat Keterangan Tidak Mampu</SelectItem>
+                      <SelectItem value="surat_keterangan_pengantar">Surat Keterangan Pengantar</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -665,7 +741,7 @@ const CertificateGenerator = () => {
                       <h2 className="text-lg font-bold">PEMERINTAH KABUPATEN JEPARA</h2>
                       <h3 className="text-lg font-bold">KECAMATAN KEMBANG</h3>
                       <h3 className="text-lg font-bold">DESA DERMOLO</h3>
-                      <p className="text-sm">Alamat: Jl.Beringin No.01 Dermolo 59453</p>
+                      <p className="text-sm">Alamat: {officialAddress}</p>
                     </div>
                   </div>
 
@@ -678,9 +754,9 @@ const CertificateGenerator = () => {
                   {/* Title */}
                   <div className="text-center">
                     <h2 className="text-xl font-bold underline">
-                      {formData.certificateType === "business" && "SURAT KETERANGAN USAHA"}
-                      {formData.certificateType === "indigency" && "SURAT KETERANGAN TIDAK MAMPU"}
-                      {formData.certificateType === "introductory" && "SURAT KETERANGAN PENGANTAR"}
+                      {formData.certificateType === "surat_keterangan_usaha" && "SURAT KETERANGAN USAHA"}
+                      {formData.certificateType === "surat_keterangan_tidak_mampu" && "SURAT KETERANGAN TIDAK MAMPU"}
+                      {formData.certificateType === "surat_keterangan_pengantar" && "SURAT KETERANGAN PENGANTAR"}
                     </h2>
                   </div>
 
@@ -692,7 +768,7 @@ const CertificateGenerator = () => {
                         <tbody>
                           <tr>
                             <td className="pr-6">Nama</td>
-                            <td className="pl-6">: RIYATI</td>
+                            <td className="pl-6">: {currentCouncil}</td>
                           </tr>
                           <tr>
                             <td className="pr-6">Jabatan</td>
@@ -734,7 +810,7 @@ const CertificateGenerator = () => {
 
                     {/* Type-specific content preview */}
                     <div className="mt-4">
-                      {formData.certificateType === "business" && (
+                      {formData.certificateType === "surat_keterangan_usaha" && (
                         <div>
                           <p>Adalah benar penduduk Desa Dermolo yang menjalankan usaha:</p>
                           <table className="table-auto w-full mt-2">
@@ -762,7 +838,7 @@ const CertificateGenerator = () => {
                         </div>
                       )}
                       
-                      {formData.certificateType === "indigency" && (
+                      {formData.certificateType === "surat_keterangan_tidak_mampu" && (
                         <div>
                           <p>Adalah benar penduduk Desa Dermolo yang termasuk dalam kategori keluarga tidak mampu secara ekonomi.</p>
                           {formData.purpose && (
@@ -777,8 +853,8 @@ const CertificateGenerator = () => {
                           )}
                         </div>
                       )}
-                      
-                      {formData.certificateType === "introductory" && (
+
+                      {formData.certificateType === "surat_keterangan_pengantar" && (
                         <div>
                           <p>Adalah benar penduduk Desa Dermolo yang berkelakuan baik dan tidak pernah terlibat dalam kegiatan yang melanggar hukum.</p>
                           {formData.purpose && (
@@ -805,7 +881,7 @@ const CertificateGenerator = () => {
                     <div className="text-right mt-8">
                       <p>Petinggi Dermolo</p>
                       <div className="mt-16">
-                        <p className="font-bold">RIYATI</p>
+                        <p className="font-bold">{currentCouncil}</p>
                       </div>
                     </div>
                   </div>
