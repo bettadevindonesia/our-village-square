@@ -93,7 +93,7 @@ const Events = () => {
         setLoading(true);
         setError(null);
 
-        const eventData = await useQuery("SELECT * FROM events ORDER BY event_date ASC");
+        const eventData = await useQuery("SELECT * FROM events ORDER BY event_date ASC", [], 1);
 
         if (eventData && isMounted) {
           const eventDataMap = mapDatabaseResult<EventProps>(eventData);

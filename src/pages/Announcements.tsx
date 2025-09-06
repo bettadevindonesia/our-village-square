@@ -90,7 +90,7 @@ const Announcements = () => {
       setError(null);
 
       try {
-        const announcementData = await useQuery("SELECT * FROM announcements");
+        const announcementData = await useQuery("SELECT * FROM announcements", [], 1);
         if (announcementData && isMounted) {
           const announcementDataMap = mapDatabaseResult<AnnouncementProps>(announcementData);
           setAnnouncements(announcementDataMap);

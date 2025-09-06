@@ -4,7 +4,7 @@ import { mapDatabaseResult } from "@/lib/utils";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 
-type AppSettings = {
+export type AppSettings = {
   setting_key: string;
   setting_value: string;
   description: string;

@@ -10,6 +10,10 @@ import { Link } from "react-router-dom";
 import { Calendar, Bell, Users, Phone, FileText, MapPin } from "lucide-react";
 import villageHero from "@/assets/desa-dermolo.png";
 import Footer from "@/components/Footer";
+import { useEffect, useState } from "react";
+import { useQuery } from "@/lib/tursoUtils";
+import { mapDatabaseResult } from "@/lib/utils";
+import { AppSettings } from "./Contact";
 
 const Index = () => {
   const quickLinks = [
@@ -42,6 +46,71 @@ const Index = () => {
       color: "text-primary",
     },
   ];
+
+  const [infoMap, setInfoMap] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch both datasets in parallel for better performance
+        const contactInfo = await useQuery(
+          "SELECT setting_key, setting_value, description FROM settings WHERE setting_key IN ('contact_telepon', 'contact_email', 'contact_alamat', 'contact_jam_kerja', 'contact_darurat')"
+        );
+
+        if (contactInfo && isMounted) {
+          const contactInfoMap = mapDatabaseResult<AppSettings>(contactInfo);
+          const infoMap = {};
+          contactInfoMap.forEach((item) => {
+            infoMap[item.setting_key] = item.setting_value;
+          });
+          setInfoMap(infoMap);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError("Failed to load data. Please try again later.");
+          console.error("Error fetching data:", err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    fetchData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-village-blue"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-village-blue text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -166,15 +235,53 @@ const Index = () => {
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <span className="font-medium">Kantor Desa:</span>
-                        <span>(0291) 123-456</span>
+                        <span>
+                          {(() => {
+                            let teleponArr = [];
+                            if (typeof infoMap["contact_telepon"] === "string") {
+                              try {
+                                teleponArr = JSON.parse(infoMap["contact_telepon"]);
+                              } catch {
+                                teleponArr = [infoMap["contact_telepon"]];
+                              }
+                            } else if (Array.isArray(infoMap["contact_telepon"])) {
+                              teleponArr = infoMap["contact_telepon"];
+                            } else if (infoMap["contact_telepon"]) {
+                              teleponArr = [infoMap["contact_telepon"]];
+                            }
+                            return teleponArr.join(" - ");
+                          })()}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-medium">Darurat:</span>
-                        <span>(0291) 911-000</span>
+                        <span>
+                          {Array.isArray(infoMap["contact_darurat"])
+                            ? infoMap["contact_darurat"].map((item, index) => (
+                                <span key={index}>{item}</span>
+                              ))
+                            : infoMap["contact_darurat"]}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-medium">Email:</span>
-                        <span>kantor@desadermolo.id</span>
+                        <span>
+                          {(() => {
+                            let emailArr = [];
+                            if (typeof infoMap["contact_email"] === "string") {
+                              try {
+                                emailArr = JSON.parse(infoMap["contact_email"]);
+                              } catch {
+                                emailArr = [infoMap["contact_email"]];
+                              }
+                            } else if (Array.isArray(infoMap["contact_email"])) {
+                              emailArr = infoMap["contact_email"];
+                            } else if (infoMap["contact_email"]) {
+                              emailArr = [infoMap["contact_email"]];
+                            }
+                            return emailArr.join(" - ");
+                          })()}
+                        </span>
                       </div>
                     </div>
                     <Link to="/kontak" className="block">

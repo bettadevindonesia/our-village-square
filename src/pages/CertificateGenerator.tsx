@@ -3,7 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useFreshQuery } from "@/lib/tursoUtils";
@@ -12,7 +18,10 @@ import jsPDF from "jspdf";
 import { Download, Eye, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 
-type CertificateType = "surat_keterangan_usaha" | "surat_keterangan_tidak_mampu" | "surat_keterangan_pengantar";
+type CertificateType =
+  | "surat_keterangan_usaha"
+  | "surat_keterangan_tidak_mampu"
+  | "surat_keterangan_pengantar";
 
 interface FormData {
   document_number?: string;
@@ -51,17 +60,19 @@ const CertificateGenerator = () => {
     applicantName: "",
     placeOfBirth: "",
     dateOfBirth: "",
-    occupation: "",
+    occupation: "Unemployed",
     address: "",
     rtRwLetterNumber: "",
-    rtRwLetterDate: ""
+    rtRwLetterDate: "",
   });
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [docNumberSequence, setDocNumberSequence] = useState<DocumentSequence[]>([]);
+  const [docNumberSequence, setDocNumberSequence] = useState<
+    DocumentSequence[]
+  >([]);
   const [currentCouncil, setCurrentCouncil] = useState<string>("");
   const [officialAddress, setOfficialAddress] = useState<string>("");
 
@@ -72,19 +83,34 @@ const CertificateGenerator = () => {
         setLoading(true);
         setError(null);
 
-        const docSequence = await useFreshQuery("SELECT * FROM document_sequences");
-        const currentCouncil = await useFreshQuery("SELECT name FROM officials WHERE position = 'Petinggi Dermolo'");
-        const officialAddress = await useFreshQuery("SELECT setting_key, setting_value FROM settings WHERE setting_key = 'contact_alamat'");
+        const docSequence = await useFreshQuery(
+          "SELECT * FROM document_sequences"
+        );
+        const currentCouncil = await useFreshQuery(
+          "SELECT name FROM officials WHERE position = 'Petinggi Dermolo'"
+        );
+        const officialAddress = await useFreshQuery(
+          "SELECT setting_key, setting_value FROM settings WHERE setting_key = 'contact_alamat'"
+        );
 
         if (docSequence && currentCouncil && officialAddress && isMounted) {
-          const docSequenceMap = mapDatabaseResult<DocumentSequence>(docSequence);
+          const docSequenceMap =
+            mapDatabaseResult<DocumentSequence>(docSequence);
           setDocNumberSequence(docSequenceMap);
 
-          const currentCouncilMap = mapDatabaseResult<{ name: string }>(currentCouncil);
+          const currentCouncilMap = mapDatabaseResult<{ name: string }>(
+            currentCouncil
+          );
           setCurrentCouncil(currentCouncilMap[0].name);
 
-          const officialAddressMap = mapDatabaseResult<{ setting_value: string }>(officialAddress);
-          setOfficialAddress(JSON.parse(officialAddressMap[0].setting_value.toString()).join(", "));
+          const officialAddressMap = mapDatabaseResult<{
+            setting_value: string;
+          }>(officialAddress);
+          setOfficialAddress(
+            JSON.parse(officialAddressMap[0].setting_value.toString()).join(
+              ", "
+            )
+          );
         }
       } catch (err) {
         if (isMounted) {
@@ -100,44 +126,135 @@ const CertificateGenerator = () => {
 
     preparedData();
 
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const generateLetterNumber = (type: CertificateType): string => {
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
-    const sequentialNumber = docNumberSequence.find(seq => seq.certificate_type === type)?.current_number + 1;
+    const sequentialNumber =
+      docNumberSequence.find((seq) => seq.certificate_type === type)
+        ?.current_number + 1;
 
-    const romanNumerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+    const romanNumerals = [
+      "I",
+      "II",
+      "III",
+      "IV",
+      "V",
+      "VI",
+      "VII",
+      "VIII",
+      "IX",
+      "X",
+      "XI",
+      "XII",
+    ];
     const romanMonth = romanNumerals[month - 1];
 
-    const typePrefix = Object.fromEntries(docNumberSequence.map(seq => [seq.certificate_type, seq.prefix_code]));
+    const typePrefix = Object.fromEntries(
+      docNumberSequence.map((seq) => [seq.certificate_type, seq.prefix_code])
+    );
 
-    return `${typePrefix[type]} / ${sequentialNumber.toString().padStart(3, '0')} / ${romanMonth} / ${year}`;
+    return `${typePrefix[type]} / ${sequentialNumber
+      .toString()
+      .padStart(3, "0")} / ${romanMonth} / ${year}`;
   };
 
-  const generatePDF = () => {
+  const saveCertificateToDatabase = async () => {
+    if (!formData.certificateType) {
+      toast({
+        title: "Error",
+        description: "Certificate type is missing.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const endpoint = import.meta.env.MODE === "production" ? import.meta.env.VITE_API_PROD_BASE_URL : import.meta.env.VITE_API_DEV_BASE_URL;
+
+    try {
+      const response = await fetch(`${endpoint}/api/certificates`, {
+        // Adjust URL if your apps are separate
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer YOUR_API_TOKEN`,
+        },
+        body: JSON.stringify({
+          certificateType: formData.certificateType,
+          applicantName: formData.applicantName,
+          placeOfBirth: formData.placeOfBirth,
+          dateOfBirth: formData.dateOfBirth,
+          occupation: formData.occupation ?? "Unemployed",
+          address: formData.address,
+          businessName: formData.businessName,
+          businessType: formData.businessType,
+          businessAddress: formData.businessAddress,
+          businessYears: formData.businessYears,
+          rtRwLetterNumber: formData.rtRwLetterNumber,
+          rtRwLetterDate: formData.rtRwLetterDate,
+          gender: formData.gender,
+          religion: formData.religion,
+          purpose: formData.purpose,
+          nationality: formData.nationality,
+          familyCardNumber: formData.familyCardNumber,
+          nationalIdNumber: formData.nationalIdNumber,
+          validFromDate: formData.validFromDate,
+          remarks: formData.remarks,
+          documentNumber: formData.document_number, // Use the generated number
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save certificate");
+      }
+
+      const result = await response.json();
+      console.log("Certificate saved:", result);
+      toast({
+        title: "Success",
+        description: `Certificate saved successfully with ID: ${result.id}`,
+      });
+    } catch (error) {
+      console.error("Error saving certificate:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save certificate to database.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const generatePDF = async () => {
     if (!formData.certificateType) {
       toast({
         title: "Tipe Surat Belum Dipilih",
         description: "Silakan pilih tipe surat terlebih dahulu.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     // Letter number and date
-    const letterNumber = generateLetterNumber(formData.certificateType as CertificateType);
+    const letterNumber = generateLetterNumber(
+      formData.certificateType as CertificateType
+    );
     formData.document_number = letterNumber;
 
     const doc = new jsPDF();
@@ -148,9 +265,13 @@ const CertificateGenerator = () => {
     // Header
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("PEMERINTAH KABUPATEN JEPARA", pageWidth / 2, yPosition, { align: "center" });
+    doc.text("PEMERINTAH KABUPATEN JEPARA", pageWidth / 2, yPosition, {
+      align: "center",
+    });
     yPosition += 8;
-    doc.text("KECAMATAN KEMBANG", pageWidth / 2, yPosition, { align: "center" });
+    doc.text("KECAMATAN KEMBANG", pageWidth / 2, yPosition, {
+      align: "center",
+    });
     yPosition += 8;
     doc.text("DESA DERMOLO", pageWidth / 2, yPosition, { align: "center" });
     yPosition += 8;
@@ -158,7 +279,9 @@ const CertificateGenerator = () => {
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text(`Alamat: ${officialAddress}`, pageWidth / 2, yPosition, { align: "center" });
+    doc.text(`Alamat: ${officialAddress}`, pageWidth / 2, yPosition, {
+      align: "center",
+    });
     yPosition += 15;
 
     // Separator line
@@ -168,7 +291,11 @@ const CertificateGenerator = () => {
 
     doc.setFontSize(12);
     doc.text(`Nomor: ${letterNumber}`, margin, yPosition);
-    doc.text(`Dermolo, ${new Date().toLocaleDateString('id-ID')}`, pageWidth - margin - 60, yPosition);
+    doc.text(
+      `Dermolo, ${new Date().toLocaleDateString("id-ID")}`,
+      pageWidth - margin - 60,
+      yPosition
+    );
     yPosition += 20;
 
     // Letter title
@@ -209,22 +336,31 @@ const CertificateGenerator = () => {
     doc.text("Nama", margin + 10, yPosition);
     doc.text(`: ${formData.applicantName}`, margin + 50, yPosition);
     yPosition += 8;
-    
+
     if (formData.placeOfBirth && formData.dateOfBirth) {
       doc.text("Tempat/Tgl Lahir", margin + 10, yPosition);
-      doc.text(`: ${formData.placeOfBirth}, ${new Date(formData.dateOfBirth).toLocaleDateString('id-ID')}`, margin + 50, yPosition);
+      doc.text(
+        `: ${formData.placeOfBirth}, ${new Date(
+          formData.dateOfBirth
+        ).toLocaleDateString("id-ID")}`,
+        margin + 50,
+        yPosition
+      );
       yPosition += 8;
     }
-    
+
     if (formData.occupation) {
       doc.text("Pekerjaan", margin + 10, yPosition);
       doc.text(`: ${formData.occupation}`, margin + 50, yPosition);
       yPosition += 8;
     }
-    
+
     if (formData.address) {
       doc.text("Alamat", margin + 10, yPosition);
-      const addressLines = doc.splitTextToSize(`: ${formData.address}`, pageWidth - margin - 60);
+      const addressLines = doc.splitTextToSize(
+        `: ${formData.address}`,
+        pageWidth - margin - 60
+      );
       doc.text(addressLines[0], margin + 50, yPosition);
       for (let i = 1; i < addressLines.length; i++) {
         yPosition += 6;
@@ -236,7 +372,11 @@ const CertificateGenerator = () => {
     // Type-specific content
     yPosition += 5;
     if (formData.certificateType === "surat_keterangan_usaha") {
-      doc.text("Adalah benar penduduk Desa Dermolo yang menjalankan usaha:", margin, yPosition);
+      doc.text(
+        "Adalah benar penduduk Desa Dermolo yang menjalankan usaha:",
+        margin,
+        yPosition
+      );
       yPosition += 10;
       if (formData.businessName) {
         doc.text("Nama Usaha", margin + 10, yPosition);
@@ -254,7 +394,11 @@ const CertificateGenerator = () => {
         yPosition += 8;
       }
     } else if (formData.certificateType === "surat_keterangan_tidak_mampu") {
-      doc.text("Adalah benar penduduk Desa Dermolo yang termasuk dalam kategori", margin, yPosition);
+      doc.text(
+        "Adalah benar penduduk Desa Dermolo yang termasuk dalam kategori",
+        margin,
+        yPosition
+      );
       yPosition += 8;
       doc.text("keluarga tidak mampu secara ekonomi.", margin, yPosition);
       yPosition += 10;
@@ -264,9 +408,17 @@ const CertificateGenerator = () => {
         yPosition += 8;
       }
     } else if (formData.certificateType === "surat_keterangan_pengantar") {
-      doc.text("Adalah benar penduduk Desa Dermolo yang berkelakuan baik", margin, yPosition);
+      doc.text(
+        "Adalah benar penduduk Desa Dermolo yang berkelakuan baik",
+        margin,
+        yPosition
+      );
       yPosition += 8;
-      doc.text("dan tidak pernah terlibat dalam kegiatan yang melanggar hukum.", margin, yPosition);
+      doc.text(
+        "dan tidak pernah terlibat dalam kegiatan yang melanggar hukum.",
+        margin,
+        yPosition
+      );
       yPosition += 10;
       if (formData.purpose) {
         doc.text("Keperluan", margin + 10, yPosition);
@@ -278,14 +430,28 @@ const CertificateGenerator = () => {
     // RT/RW Letter reference
     yPosition += 10;
     if (formData.rtRwLetterNumber && formData.rtRwLetterDate) {
-      doc.text(`Berdasarkan surat pengantar RT/RW No: ${formData.rtRwLetterNumber}`, margin, yPosition);
+      doc.text(
+        `Berdasarkan surat pengantar RT/RW No: ${formData.rtRwLetterNumber}`,
+        margin,
+        yPosition
+      );
       yPosition += 8;
-      doc.text(`tanggal ${new Date(formData.rtRwLetterDate).toLocaleDateString('id-ID')}`, margin, yPosition);
+      doc.text(
+        `tanggal ${new Date(formData.rtRwLetterDate).toLocaleDateString(
+          "id-ID"
+        )}`,
+        margin,
+        yPosition
+      );
       yPosition += 15;
     }
 
     // Closing
-    doc.text("Demikian surat keterangan ini dibuat untuk dapat dipergunakan", margin, yPosition);
+    doc.text(
+      "Demikian surat keterangan ini dibuat untuk dapat dipergunakan",
+      margin,
+      yPosition
+    );
     yPosition += 8;
     doc.text("sebagaimana mestinya.", margin, yPosition);
     yPosition += 30;
@@ -293,10 +459,13 @@ const CertificateGenerator = () => {
     // Signature
     doc.text("Petinggi Dermolo", pageWidth - margin - 50, yPosition);
     yPosition += 30;
-    doc.text("RIYATI", pageWidth - margin - 50, yPosition);
+    doc.text(currentCouncil, pageWidth - margin - 50, yPosition);
 
     // Save PDF
-    const fileName = `surat_${formData.certificateType}_${new Date().toISOString().split('T')[0]}.pdf`;
+    await saveCertificateToDatabase();
+    const fileName = `surat_${formData.certificateType}_${
+      new Date().toISOString().split("T")[0]
+    }.pdf`;
     doc.save(fileName);
 
     toast({
@@ -310,7 +479,7 @@ const CertificateGenerator = () => {
       toast({
         title: "Data Belum Lengkap",
         description: "Silakan lengkapi data yang diperlukan untuk preview.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -326,7 +495,7 @@ const CertificateGenerator = () => {
       occupation: "",
       address: "",
       rtRwLetterNumber: "",
-      rtRwLetterDate: ""
+      rtRwLetterDate: "",
     });
     setIsPreviewMode(false);
   };
@@ -374,7 +543,12 @@ const CertificateGenerator = () => {
           <div className="space-y-2">
             <Label htmlFor="occupation">Pekerjaan</Label>
             {formData.certificateType === "surat_keterangan_tidak_mampu" ? (
-              <Select value={formData.occupation} onValueChange={(value) => handleSelectChange("occupation", value)}>
+              <Select
+                value={formData.occupation}
+                onValueChange={(value) =>
+                  handleSelectChange("occupation", value)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih pekerjaan" />
                 </SelectTrigger>
@@ -384,7 +558,9 @@ const CertificateGenerator = () => {
                   <SelectItem value="pns">PNS</SelectItem>
                   <SelectItem value="buruh">Buruh</SelectItem>
                   <SelectItem value="nelayan">Nelayan</SelectItem>
-                  <SelectItem value="ibu_rumah_tangga">Ibu Rumah Tangga</SelectItem>
+                  <SelectItem value="ibu_rumah_tangga">
+                    Ibu Rumah Tangga
+                  </SelectItem>
                   <SelectItem value="swasta">Karyawan Swasta</SelectItem>
                   <SelectItem value="tidak_bekerja">Tidak Bekerja</SelectItem>
                 </SelectContent>
@@ -471,7 +647,10 @@ const CertificateGenerator = () => {
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="gender">Jenis Kelamin</Label>
-                <Select value={formData.gender} onValueChange={(value) => handleSelectChange("gender", value)}>
+                <Select
+                  value={formData.gender}
+                  onValueChange={(value) => handleSelectChange("gender", value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Pilih jenis kelamin" />
                   </SelectTrigger>
@@ -483,7 +662,12 @@ const CertificateGenerator = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="religion">Agama</Label>
-                <Select value={formData.religion} onValueChange={(value) => handleSelectChange("religion", value)}>
+                <Select
+                  value={formData.religion}
+                  onValueChange={(value) =>
+                    handleSelectChange("religion", value)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Pilih agama" />
                   </SelectTrigger>
@@ -528,7 +712,12 @@ const CertificateGenerator = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="religion">Agama</Label>
-                <Select value={formData.religion} onValueChange={(value) => handleSelectChange("religion", value)}>
+                <Select
+                  value={formData.religion}
+                  onValueChange={(value) =>
+                    handleSelectChange("religion", value)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Pilih agama" />
                   </SelectTrigger>
@@ -643,8 +832,8 @@ const CertificateGenerator = () => {
       <div className="flex justify-center items-center h-64">
         <div className="text-center">
           <p className="text-red-500 mb-4">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="px-4 py-2 bg-village-blue text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             Retry
@@ -658,10 +847,12 @@ const CertificateGenerator = () => {
     <div className="py-8">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Generator Surat Desa Dermolo</h1>
+          <h1 className="text-4xl font-bold mb-4">
+            Generator Surat Desa Dermolo
+          </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Buat berbagai jenis surat keterangan resmi Desa Dermolo dengan mudah.
-            Pilih jenis surat dan isi formulir untuk menghasilkan PDF.
+            Buat berbagai jenis surat keterangan resmi Desa Dermolo dengan
+            mudah. Pilih jenis surat dan isi formulir untuk menghasilkan PDF.
           </p>
         </div>
 
@@ -677,17 +868,25 @@ const CertificateGenerator = () => {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="certificateType">Jenis Surat</Label>
-                  <Select 
-                    value={formData.certificateType} 
-                    onValueChange={(value) => handleSelectChange("certificateType", value)}
+                  <Select
+                    value={formData.certificateType}
+                    onValueChange={(value) =>
+                      handleSelectChange("certificateType", value)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Pilih jenis surat" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="surat_keterangan_usaha">Surat Keterangan Usaha</SelectItem>
-                      <SelectItem value="surat_keterangan_tidak_mampu">Surat Keterangan Tidak Mampu</SelectItem>
-                      <SelectItem value="surat_keterangan_pengantar">Surat Keterangan Pengantar</SelectItem>
+                      <SelectItem value="surat_keterangan_usaha">
+                        Surat Keterangan Usaha
+                      </SelectItem>
+                      <SelectItem value="surat_keterangan_tidak_mampu">
+                        Surat Keterangan Tidak Mampu
+                      </SelectItem>
+                      <SelectItem value="surat_keterangan_pengantar">
+                        Surat Keterangan Pengantar
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -700,7 +899,10 @@ const CertificateGenerator = () => {
                       <Eye className="w-4 h-4 mr-2" />
                       Preview Surat
                     </Button>
-                    <Button onClick={generatePDF} disabled={!formData.applicantName.trim()}>
+                    <Button
+                      onClick={generatePDF}
+                      disabled={!formData.applicantName.trim()}
+                    >
                       <Download className="w-4 h-4 mr-2" />
                       Unduh PDF
                     </Button>
@@ -735,10 +937,17 @@ const CertificateGenerator = () => {
                   {/* Header */}
                   <div className="border-b pb-4 flex w-full">
                     <div className="w-1/4">
-                      <img src={logoKabJepara} alt="Logo Kabupaten Jepara" width={80} height={80} />
+                      <img
+                        src={logoKabJepara}
+                        alt="Logo Kabupaten Jepara"
+                        width={80}
+                        height={80}
+                      />
                     </div>
                     <div className="text-center w-full">
-                      <h2 className="text-lg font-bold">PEMERINTAH KABUPATEN JEPARA</h2>
+                      <h2 className="text-lg font-bold">
+                        PEMERINTAH KABUPATEN JEPARA
+                      </h2>
                       <h3 className="text-lg font-bold">KECAMATAN KEMBANG</h3>
                       <h3 className="text-lg font-bold">DESA DERMOLO</h3>
                       <p className="text-sm">Alamat: {officialAddress}</p>
@@ -747,16 +956,26 @@ const CertificateGenerator = () => {
 
                   {/* Letter Number and Date */}
                   <div className="flex justify-between text-sm">
-                    <p>Nomor: {generateLetterNumber(formData.certificateType as CertificateType)}</p>
-                    <p>Dermolo, {new Date().toLocaleDateString('id-ID')}</p>
+                    <p>
+                      Nomor:{" "}
+                      {generateLetterNumber(
+                        formData.certificateType as CertificateType
+                      )}
+                    </p>
+                    <p>Dermolo, {new Date().toLocaleDateString("id-ID")}</p>
                   </div>
 
                   {/* Title */}
                   <div className="text-center">
                     <h2 className="text-xl font-bold underline">
-                      {formData.certificateType === "surat_keterangan_usaha" && "SURAT KETERANGAN USAHA"}
-                      {formData.certificateType === "surat_keterangan_tidak_mampu" && "SURAT KETERANGAN TIDAK MAMPU"}
-                      {formData.certificateType === "surat_keterangan_pengantar" && "SURAT KETERANGAN PENGANTAR"}
+                      {formData.certificateType === "surat_keterangan_usaha" &&
+                        "SURAT KETERANGAN USAHA"}
+                      {formData.certificateType ===
+                        "surat_keterangan_tidak_mampu" &&
+                        "SURAT KETERANGAN TIDAK MAMPU"}
+                      {formData.certificateType ===
+                        "surat_keterangan_pengantar" &&
+                        "SURAT KETERANGAN PENGANTAR"}
                     </h2>
                   </div>
 
@@ -777,7 +996,7 @@ const CertificateGenerator = () => {
                         </tbody>
                       </table>
                     </div>
-                    
+
                     <p>Dengan ini menerangkan bahwa:</p>
                     <div className="ml-4">
                       <table className="table-auto w-full">
@@ -789,7 +1008,12 @@ const CertificateGenerator = () => {
                           {formData.placeOfBirth && formData.dateOfBirth && (
                             <tr>
                               <td className="pr-2">Tempat/Tgl Lahir</td>
-                              <td className="pl-2">: {`${formData.placeOfBirth}, ${new Date(formData.dateOfBirth).toLocaleDateString('id-ID')}`}</td>
+                              <td className="pl-2">
+                                :{" "}
+                                {`${formData.placeOfBirth}, ${new Date(
+                                  formData.dateOfBirth
+                                ).toLocaleDateString("id-ID")}`}
+                              </td>
                             </tr>
                           )}
                           {formData.occupation && (
@@ -810,37 +1034,51 @@ const CertificateGenerator = () => {
 
                     {/* Type-specific content preview */}
                     <div className="mt-4">
-                      {formData.certificateType === "surat_keterangan_usaha" && (
+                      {formData.certificateType ===
+                        "surat_keterangan_usaha" && (
                         <div>
-                          <p>Adalah benar penduduk Desa Dermolo yang menjalankan usaha:</p>
+                          <p>
+                            Adalah benar penduduk Desa Dermolo yang menjalankan
+                            usaha:
+                          </p>
                           <table className="table-auto w-full mt-2">
                             <tbody>
                               {formData.businessName && (
                                 <tr>
                                   <td className="pr-2">Nama Usaha</td>
-                                  <td className="pl-2">: {formData.businessName}</td>
+                                  <td className="pl-2">
+                                    : {formData.businessName}
+                                  </td>
                                 </tr>
                               )}
                               {formData.businessType && (
                                 <tr>
                                   <td className="pr-2">Jenis Usaha</td>
-                                  <td className="pl-2">: {formData.businessType}</td>
+                                  <td className="pl-2">
+                                    : {formData.businessType}
+                                  </td>
                                 </tr>
                               )}
                               {formData.businessYears && (
                                 <tr>
                                   <td className="pr-2">Lama Usaha</td>
-                                  <td className="pl-2">: {formData.businessYears} tahun</td>
+                                  <td className="pl-2">
+                                    : {formData.businessYears} tahun
+                                  </td>
                                 </tr>
                               )}
                             </tbody>
                           </table>
                         </div>
                       )}
-                      
-                      {formData.certificateType === "surat_keterangan_tidak_mampu" && (
+
+                      {formData.certificateType ===
+                        "surat_keterangan_tidak_mampu" && (
                         <div>
-                          <p>Adalah benar penduduk Desa Dermolo yang termasuk dalam kategori keluarga tidak mampu secara ekonomi.</p>
+                          <p>
+                            Adalah benar penduduk Desa Dermolo yang termasuk
+                            dalam kategori keluarga tidak mampu secara ekonomi.
+                          </p>
                           {formData.purpose && (
                             <table className="table-auto w-full mt-2">
                               <tbody>
@@ -854,9 +1092,14 @@ const CertificateGenerator = () => {
                         </div>
                       )}
 
-                      {formData.certificateType === "surat_keterangan_pengantar" && (
+                      {formData.certificateType ===
+                        "surat_keterangan_pengantar" && (
                         <div>
-                          <p>Adalah benar penduduk Desa Dermolo yang berkelakuan baik dan tidak pernah terlibat dalam kegiatan yang melanggar hukum.</p>
+                          <p>
+                            Adalah benar penduduk Desa Dermolo yang berkelakuan
+                            baik dan tidak pernah terlibat dalam kegiatan yang
+                            melanggar hukum.
+                          </p>
                           {formData.purpose && (
                             <table className="table-auto w-full mt-2">
                               <tbody>
@@ -872,10 +1115,19 @@ const CertificateGenerator = () => {
                     </div>
 
                     {formData.rtRwLetterNumber && formData.rtRwLetterDate && (
-                      <p>Berdasarkan surat pengantar RT/RW No: {formData.rtRwLetterNumber} tanggal {new Date(formData.rtRwLetterDate).toLocaleDateString('id-ID')}</p>
+                      <p>
+                        Berdasarkan surat pengantar RT/RW No:{" "}
+                        {formData.rtRwLetterNumber} tanggal{" "}
+                        {new Date(formData.rtRwLetterDate).toLocaleDateString(
+                          "id-ID"
+                        )}
+                      </p>
                     )}
 
-                    <p>Demikian surat keterangan ini dibuat untuk dapat dipergunakan sebagaimana mestinya.</p>
+                    <p>
+                      Demikian surat keterangan ini dibuat untuk dapat
+                      dipergunakan sebagaimana mestinya.
+                    </p>
 
                     {/* Signature */}
                     <div className="text-right mt-8">
