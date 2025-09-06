@@ -193,7 +193,7 @@ const CertificateGenerator = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          'Authorization': `Bearer YOUR_API_TOKEN`,
+          'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`,
         },
         body: JSON.stringify({
           certificateType: formData.certificateType,
